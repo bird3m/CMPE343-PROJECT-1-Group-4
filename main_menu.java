@@ -1,12 +1,15 @@
-import java.util.Scanner;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*; //for scanner,lists, random
+
+
 
 public class main_menu
 {
 
-	public static void main(String[] args)
+	public static void main(String[] args) 
 	{
-		//clearConsole();
 		callMenu();
 	}
 	
@@ -28,6 +31,8 @@ public class main_menu
                 playNyanCat();
                 animationFlag = true;
             }
+            
+            showWelcomeScreen();
 
 
 			System.out.println("\nPlease select one of the options below: \n[A] Primary School");
@@ -50,7 +55,7 @@ public class main_menu
 
 			if (str.equals("A"))
 			{
-				//call func
+				primarySchoolMenu();
 				break;
 			}
 			else if (str.equals("B"))
@@ -126,11 +131,29 @@ static void playNyanCat()
 			 String indent = rainbowPrefix(x, r, raw.length); 
         	System.out.println(indent + raw[r]);
 		}        
-        try { Thread.sleep(80); } catch (InterruptedException ignored) {}
+        try { Thread.sleep(20); } catch (InterruptedException ignored) {}
+
 	
 	}
 }
 
+//*Displays the welcome message */
+static void showWelcomeScreen()
+{
+    
+   String banner =  BLUE_FG + """
+  _     _  _______  ___      _______  _______  __   __  _______    ___   ____   
+| | _ | ||       ||   |    |       ||       ||  |_|  ||       |  |   | |    |  
+| || || ||    ___||   |    |       ||   _   ||       ||    ___|  |___| |_    | 
+|       ||   |___ |   |    |       ||  | |  ||       ||   |___    ___    |   | 
+|       ||    ___||   |___ |      _||  |_|  ||       ||    ___|  |   |   |   | 
+|   _   ||   |___ |       ||     |_ |       || ||_|| ||   |___   |___|  _|   | 
+|__| |__||_______||_______||_______||_______||_|   |_||_______|        |____|  
+""" + RESET; 
+
+System.out.println(banner);
+
+}
 
 //for the rainbow trail behind the cat
 static String rainbowPrefix(int x, int row, int totalRows)
@@ -163,12 +186,369 @@ static String rainbowPrefix(int x, int row, int totalRows)
     }
 }
 
+//-------------------------------------------------PRIMARY SCHOOL---------------------------------------------------
+/**
+     * Displays the Primary School submenu and manages user selection.
+     */
+    static Scanner scanner = new Scanner(System.in);
+    static final LocalDate TODAY = LocalDate.now();
 
+    public static void primarySchoolMenu() {
+        boolean running = true;
+        while (running) {
+            System.out.println("\n\033[1;92m" + "------------------------------------" + "\033[0m");
+            System.out.println("\033[1;96m" + "    PRIMARY SCHOOL FUN ZONE! " + "\033[0m");
+            System.out.println("\033[1;92m" + "------------------------------------" + "\033[0m");
+            System.out.println("\033[1;93m" + "    [1] Age & Zodiac Magic Calculator" + "\033[0m");
+            System.out.println("\033[1;94m" + "    [2] Word Reversal Wonderland" + "\033[0m");
+            System.out.println("\033[1;95m" + "    [3] Back to Main Menu" + "\033[0m");
+            System.out.println("\033[1;92m" + "------------------------------------" + "\033[0m");
+            
+            String choice = getUserChoice("\n\033[1;36m" + "Choose your fun activity (1-3):" + "\033[0m");
+            
+            clearConsole(); // The screen should be cleared after submenu selection
+
+            switch (choice) {
+                case "1":
+                    calculateAgeAndZodiac();
+                    askForRepeatOrReturn(main_menu::calculateAgeAndZodiac, main_menu::primarySchoolMenu);
+                    return; 
+                case "2":
+                    reverseWordsOperation();
+                    askForRepeatOrReturn(main_menu::reverseWordsOperation, main_menu::primarySchoolMenu);
+                    return;
+                case "3":
+                    return; // Exit the primarySchoolMenu method and return to mainMenu
+                default:
+                    System.out.println("\n\033[1;91m" + "Oh no! That's not a valid choice! " + "\033[0m");
+            }
+        }
+    }
+
+     /**
+     * Gets a menu choice (A-E or 1-3) from the user.
+     */
+    public static String getUserChoice(String prompt) {
+        System.out.print(prompt + " ");
+        // Reads the entire line, which is necessary for menu choices.
+        if (scanner.hasNextLine()) {
+            return scanner.nextLine().trim();
+        }
+        return "";
+    }
+    
+    /**
+     * Calculates age (year, month, day) and zodiac sign from the birth date.
+     * Uses built-in date functions as requested by the user, overriding original project constraint.
+     */
+    public static void calculateAgeAndZodiac() {
+        System.out.println("\n\033[1;95m" + "-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-" + "\033[0m");
+        System.out.println("\033[1;96m" + "    AGE & ZODIAC MAGIC CALCULATOR " + "\033[0m");
+        System.out.println("\033[1;95m" + "-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-" + "\033[0m");
+        System.out.println("\033[1;93m" + "Today's Date: " + TODAY.getDayOfMonth() + "." + TODAY.getMonthValue() + "." + TODAY.getYear() + " " + "\033[0m");
+        
+        // 1. Get the birth date from the user (with error handling)
+        int day = 0, month = 0, year = 0;
+        
+        // Loop until a valid date is obtained
+        boolean dateValid = false;
+        LocalDate birthDate = null;
+        while (!dateValid) {
+            day = getValidatedInteger("\n\033[1;36m" + "Enter your magical birth day (DD): " + "\033[0m");
+            month = getValidatedInteger("\033[1;36m" + "Enter your magical birth month (MM): " + "\033[0m");
+            year = getValidatedInteger("\033[1;36m" + "Enter your magical birth year (YYYY): " + "\033[0m");
+
+            if (isValidInputDate(day, month, year)) {
+                try {
+                    birthDate = LocalDate.of(year, month, day);
+                    if (birthDate.isAfter(TODAY)) {
+                         // REVISED ERROR MESSAGE 1
+                         System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: TIME TRAVELER DETECTED! !!!" + "\033[0m");
+                         System.out.println("\033[1;91m" + "The birth date can't be in the future (after " + TODAY + ")! " + "\033[0m");
+                    } else {
+                        dateValid = true;
+                    }
+                } catch (Exception e) {
+                    // REVISED ERROR MESSAGE 2
+                    System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: INVALID DATE COMBINATION! !!!" + "\033[0m");
+                    System.out.println("\033[1;91m" + "Oopsie! That date combination (" + day + "." + month + "." + year + ") doesn't exist in our magical calendar! " + "\033[0m");
+                }
+            } else {
+                // REVISED ERROR MESSAGE 3
+                System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: OUT OF RANGE! !!!" + "\033[0m");
+                System.out.println("\033[1;91m" + "That date seems a bit too magical! Please ensure the day (1-31), month (1-12), and a reasonable year are entered! " + "\033[0m");
+            }
+        }
+        
+        // 2. Age Calculation (Using built-in ChronoUnit)
+        long years = ChronoUnit.YEARS.between(birthDate, TODAY);
+        long months = ChronoUnit.MONTHS.between(birthDate.plusYears(years), TODAY);
+        long days = ChronoUnit.DAYS.between(birthDate.plusYears(years).plusMonths(months), TODAY);
+
+        // 3. Zodiac Sign Calculation (Custom Code)
+        String zodiac = calculateZodiacSign(day, month);
+        
+        System.out.println("\033[1;96m" + "    YOUR MAGICAL RESULTS:" + "\033[0m");
+
+        System.out.println("\033[1;93m" + "    Your Age: " + years + " years, " + months + " months, " + days + " days "); 
+        System.out.println("\033[1;94m" + "    Your Zodiac Sign: " + zodiac + " ");  
+        
+    }
+    
+    /**
+     * Initiates the operation to reverse the words in the text received from the user.
+     */
+    public static void reverseWordsOperation() {
+        System.out.println("\033[1;96m" + "    WORD REVERSAL WONDERLAND! " + "\033[0m");
+        System.out.println("\033[1;93m" + "Enter your magical text below: "); 
+        
+        String input = "";
+        
+        // [FIX] We read until a non-empty line is provided. This handles the initial empty line skip
+        // after menu selection or after a Repeat (R) choice.
+        while (scanner.hasNextLine()) {
+            input = scanner.nextLine();
+            if (!input.trim().isEmpty()) {
+                break; // Found non-empty input, exit loop
+            }
+            // If it was just an empty line (the skipped newline character), loop again
+        }
+
+        // Call the main recursive method
+        String reversedText = reverseWordsInText(input); 
+        
+        System.out.println("\n\033[1;92m" + "Original Text:" + "\033[0m");
+        System.out.println("\033[1;97m" + input + "\033[0m");
+        System.out.println("\n\033[1;94m" + "Reversed Text:" + "\033[0m");
+        System.out.println("\033[1;97m" + reversedText + "\033[0m"); 
+    }
+    
+    /**
+     * Recursively reverses the words in the text.
+     * Handles words containing mixed letters and numbers (e.g., "word123").
+     * @param text The text to be reversed.
+     * @return The text with reversed words.
+     */
+    public static String reverseWordsInText(String text) {
+        // A regular expression is used to split the text into words and delimiters (spaces, punctuation).
+        String[] tokens = text.split("(?<=\\s)|(?=\\s)|(?<=[^\\p{L}0-9])|(?=[^\\p{L}0-9])");
+        
+        // Call the recursive helper method
+        return processTokensRecursively(tokens, 0);
+    }
+
+    /**
+     * Recursively processes the text components (tokens).
+     * @param tokens Array consisting of words and delimiters.
+     * @param index The index of the token to be processed.
+     * @return The processed text.
+     */
+    private static String processTokensRecursively(String[] tokens, int index) {
+        if (index >= tokens.length) {
+            return ""; // Base case: End of the array is reached.
+        }
+
+        String token = tokens[index];
+        String processedToken;
+
+        // [FIX for Requirement 3] Check if the token is NOT just whitespace or punctuation.
+        // It should contain at least one letter or number and be length 2 or more.
+        if (token.matches(".*[\\p{L}0-9]+.*") && token.length() >= 2) { 
+            processedToken = reverseWordPreservingNonLetters(token); // Reverse the word while preserving digit positions
+        } else {
+            // Leave punctuation, or single character/whitespace tokens as they are
+            processedToken = token;
+        }
+
+        // Recursive call: Process the rest and concatenate the result.
+        return processedToken + processTokensRecursively(tokens, index + 1);
+    }
+    
+    /**
+     * Reverses a word while preserving the positions of non-letter characters (digits, punctuation).
+     * @param word The word to reverse
+     * @return The reversed word with non-letter characters in their original positions
+     */
+    private static String reverseWordPreservingNonLetters(String word) {
+        // First, identify all non-letter characters and their positions
+        StringBuilder letters = new StringBuilder();
+        StringBuilder result = new StringBuilder();
+        int[] nonLetterPositions = new int[word.length()];
+        char[] nonLetterChars = new char[word.length()];
+        
+        // Separate letters from non-letters
+        for (int i = 0; i < word.length(); i++) {
+            char c = word.charAt(i);
+            if (Character.isLetter(c)) {
+                letters.append(c);
+                nonLetterPositions[i] = -1; // Mark as letter position
+            } else {
+                nonLetterPositions[i] = 1; // Mark as non-letter position
+                nonLetterChars[i] = c;
+            }
+        }
+        
+        // Reverse the letters only
+        String reversedLetters = reverseStringRecursively(letters.toString());
+        
+        // Reconstruct the word with non-letters in their original positions
+        int letterIndex = 0;
+        for (int i = 0; i < word.length(); i++) {
+            if (nonLetterPositions[i] == -1) {
+                // This was a letter position, take from reversed letters
+                result.append(reversedLetters.charAt(letterIndex++));
+            } else {
+                // This was a non-letter position, keep the original character
+                result.append(nonLetterChars[i]);
+            }
+        }
+        
+        return result.toString();
+    }
+    
+    /**
+     * Recursively reverses the given string. (Meets Requirement 1)
+     * @param s The string to be reversed.
+     * @return The reversed string.
+     */
+    private static String reverseStringRecursively(String s) {
+        if (s == null || s.length() <= 1) {
+            return s; // Base case
+        }
+        // Recursive step: Put the first character at the very end, reverse the rest.
+        return reverseStringRecursively(s.substring(1)) + s.charAt(0);
+    }
+
+    // --- Utility Methods ---
+
+    /**
+     * Prompts the user to enter a valid integer. 
+     */
+    private static int getValidatedInteger(String prompt) {
+        int number = 0;
+        boolean validInput = false;
+        while (!validInput) {
+            System.out.print(prompt);
+            try {
+                // User attempts to enter a valid integer.
+                if (scanner.hasNextInt()) {
+                    number = scanner.nextInt();
+                    validInput = true;
+                } else {
+                    // Invalid data type error 
+                    System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: NON-NUMERIC INPUT! !!!" + "\033[0m");
+                    System.out.println("\033[1;91m" + "That's not a valid number! Please enter digits only! " + "\033[0m"); 
+                    scanner.next(); // Consume the invalid input
+                }
+            } catch (Exception e) {
+                // General catch for unexpected errors
+                System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: UNEXPECTED ISSUE! !!!" + "\033[0m");
+                System.out.println("\033[1;91m" + "Oops! Something went wrong: " + e.getMessage() + " " + "\033[0m");
+                scanner.nextLine(); // Clear the input buffer
+            }
+        }
+        // [SAFE CLEANUP] Clears the leftover newline character after scanner.nextInt().
+        if (scanner.hasNextLine()) {
+            scanner.nextLine();
+        }
+        return number;
+    }
+
+
+    /**
+     * Asks the user to repeat an operation or return to the submenu after a process.
+     * @param repeatMethod The method to be called to repeat the operation.
+     */
+    private static void askForRepeatOrReturn(Runnable repeatMethod, Runnable menuMethod) {
+        System.out.println("\033[1;96m" + "    What would you like to do next? " + "\033[0m");
+        System.out.println("\033[1;93m" + "    [R] Play Again (Repeat Operation)" + "\033[0m");
+        System.out.println("\033[1;94m" + "    [M] Back to Main Menu" + "\033[0m");
+        
+        // We use a validated choice getter to ensure 'R' or 'M' is correctly read, 
+        // preventing the program from treating a newline as an invalid option.
+        String choice = getValidatedRMChoice("\n\033[1;36m" + "Enter your choice (R/M):" + "\033[0m").toUpperCase();
+        
+        if (choice.equals("R")) {
+            clearConsole();
+            repeatMethod.run(); 
+            // After the repeated operation is finished, we call itself to ask for R/M again (recursive)
+            askForRepeatOrReturn(repeatMethod, menuMethod);
+        } else if (choice.equals("M")) {
+            clearConsole();
+            callMenu();
+        } else {
+            // This path should ideally not be reached
+            System.out.println("\n\033[1;91m" + "Oopsie! Let's go back to the menu! " + "\033[0m");
+            clearConsole();
+            callMenu();
+        }
+    }
+    
+   
+    
+    /**
+     * Gets a validated R or M choice from the user, handling empty inputs robustly.
+     * This is crucial for preventing the newline skip bug when returning from an operation.
+     */
+    private static String getValidatedRMChoice(String prompt) {
+        String choice = "";
+        
+        // Keep reading until a valid 'R' or 'M' is provided.
+        while (true) {
+             System.out.print(prompt + " ");
+             if (scanner.hasNextLine()) {
+                 choice = scanner.nextLine().trim().toUpperCase();
+                 
+                 if (choice.equals("R") || choice.equals("M")) {
+                     return choice; // Valid choice received
+                 } else {
+                     System.out.println("\n\033[1;91m" + "Sweetie, please enter 'R' to Play Again or 'M' for Menu " + "\033[0m");
+                 }
+             }
+        }
+    }
+
+    
+
+    // --- Date Calculation Utility Methods (USING BUILT-IN FUNCTIONS) ---
+
+    /**
+     * Checks if the day, month, and year values are acceptable before attempting to create a LocalDate object.
+     */
+    private static boolean isValidInputDate(int day, int month, int year) {
+        // We allow for a future year (TODAY.getYear() + 1) to distinguish between 'invalid range'
+        // and 'future date' for a better error message in calculateAgeAndZodiac().
+        if (year < 1900 || year > TODAY.getYear() + 1) return false;
+        if (month < 1 || month > 12) return false;
+        // The day must be between 1 and 31. LocalDate.of will handle month-specific day counts (e.g., Feb 30).
+        if (day < 1 || day > 31) return false; 
+        return true;
+    }
+
+    /**
+     * Calculates the zodiac sign with its corresponding symbol. (UPDATED)
+     */
+    private static String calculateZodiacSign(int day, int month) {
+        if ((month == 3 && day >= 21) || (month == 4 && day <= 20)) return "Aries";
+        if ((month == 4 && day >= 21) || (month == 5 && day <= 21)) return "Taurus";
+        if ((month == 5 && day >= 22) || (month == 6 && day <= 21)) return "Gemini ";
+        if ((month == 6 && day >= 22) || (month == 7 && day <= 22)) return "Cancer ";
+        if ((month == 7 && day >= 23) || (month == 8 && day <= 23)) return "Leo ";
+        if ((month == 8 && day >= 24) || (month == 9 && day <= 23)) return "Virgo ";
+        if ((month == 9 && day >= 24) || (month == 10 && day <= 23)) return "Libra ";
+        if ((month == 10 && day >= 24) || (month == 11 && day <= 22)) return "Scorpio ";
+        if ((month == 11 && day >= 23) || (month == 12 && day <= 21)) return "Sagittarius ";
+        if ((month == 12 && day >= 22) || (month == 1 && day <= 20)) return "Capricorn ";
+        if ((month == 1 && day >= 21) || (month == 2 && day <= 19)) return "Aquarius ";
+        if ((month == 2 && day >= 20) || (month == 3 && day <= 20)) return "Pisces";
+        return "Invalid Day/Month Combination"; 
+    }
+
+
+//------------------------------------------------------------------------------------------------------------------
 
 
 //-------------------------------------------------- CONNECT FOUR ---------------------------------------------------
-//i will add AI later
-
 		//game constants
 		static final int EMPTY = 0;
 		static final int P1 = 1; // Red player 1
@@ -182,12 +562,15 @@ static String rainbowPrefix(int x, int row, int totalRows)
 		
 		static final String RESET  = "\u001B[0m";
 
-        /** ANSI escape codes for foreground colors. */
+        // ANSI escape codes for foreground colors. 
 		static final String RED_FG    = "\u001B[38;5;196m";
 		static final String YELLOW_FG = "\u001B[38;5;226m";
 		static final String BLUE_FG   = "\u001B[38;5;45m";
 		static final String GRAY_FG   = "\u001B[38;5;240m";
 
+        /*
+         * Connect Four game function.
+         */
 		static void connectFour()
 		{
 			Scanner sc = new Scanner(System.in);
@@ -320,7 +703,7 @@ static String rainbowPrefix(int x, int row, int totalRows)
 				}
 			}
 
-        //*After the game ends, we ask the user if they want to return or play again. */
+        //After the game ends, we ask the user if they want to return or play again.
         while(true)
         {
             System.out.println("\nThanks for playing! \n Would you like to play again or return to the main menu?");
@@ -388,10 +771,19 @@ static String rainbowPrefix(int x, int row, int totalRows)
             System.out.println("  1) Single-player (vs Computer, random moves)");
             System.out.println("  2) Two players (local)");
             System.out.print("Enter 1 or 2: ");
+
             String in = sc.nextLine().trim();
-            if (in.equals("1") || in.equals("2"))
-                return Integer.parseInt(in);
-            System.out.println("Invalid choice. Try again.\n");
+
+            try {
+            int choice = Integer.parseInt(in);
+            if (choice == 1 || choice == 2)
+                return choice;
+            else
+                System.out.println("Invalid choice. Try again.\n");
+            } 
+            catch (NumberFormatException e) {
+                System.err.println("Please enter a number (1 or 2 only).\n");
+            }
         }
     }
 
@@ -408,7 +800,12 @@ static String rainbowPrefix(int x, int row, int totalRows)
             System.out.println("Invalid choice. Try again.\n");
         }
     }
-
+/**
+ * 
+ * @param in
+ * @param cols
+ * @return
+ */
     static Integer parseColumn(String in, int cols) 
     {
         try {
@@ -581,3 +978,4 @@ static String rainbowPrefix(int x, int row, int totalRows)
 
 
 	}
+
