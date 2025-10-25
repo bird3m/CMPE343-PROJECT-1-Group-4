@@ -327,45 +327,55 @@ static void recursiveEval(String expr) {
         while (expr.contains("(")) {
             int close = expr.indexOf(')');
             int open = expr.lastIndexOf('(', close);
-            double val = evaluateFlat(expr.substring(open + 1, close));
+            int val = evaluateFlat(expr.substring(open + 1, close));
             expr = expr.substring(0, open) + val + expr.substring(close + 1);
             System.out.println(expr);
         }
-        double result = evaluateFlat(expr);
+        int result = evaluateFlat(expr);
         System.out.println("= " + result);
+
     } catch (Exception e) {
         System.err.println("Evaluation error: " + e.getMessage());
     }
 }
 
-static double evaluateFlat(String expr) {
+static int evaluateFlat(String expr) {
     List<String> tokens = new ArrayList<>();
     StringBuilder num = new StringBuilder();
     for (int i = 0; i < expr.length(); i++) {
         char c = expr.charAt(i);
-        if (Character.isDigit(c) || c == '.' || (c == '-' && (i == 0 || "+-*/".indexOf(expr.charAt(i-1)) != -1))) num.append(c);
-        else if ("+-*/".indexOf(c) != -1) { tokens.add(num.toString()); tokens.add(String.valueOf(c)); num.setLength(0); }
+        if (Character.isDigit(c) || (c == '-' && (i == 0 || "+-*/".indexOf(expr.charAt(i-1)) != -1))) {
+            num.append(c);
+        } else if ("+-*/".indexOf(c) != -1) {
+            tokens.add(num.toString());
+            tokens.add(String.valueOf(c));
+            num.setLength(0);
+        }
     }
     tokens.add(num.toString());
 
     for (int i = 0; i < tokens.size(); i++) {
         if (tokens.get(i).equals("*") || tokens.get(i).equals("/")) {
-            double left = Double.parseDouble(tokens.get(i-1));
-            double right = Double.parseDouble(tokens.get(i+1));
-            double val = tokens.get(i).equals("*") ? left * right : left / right;
-            tokens.set(i-1, Double.toString(val)); tokens.remove(i); tokens.remove(i); i--;
+            int left = Integer.parseInt(tokens.get(i-1));
+            int right = Integer.parseInt(tokens.get(i+1));
+            int val = tokens.get(i).equals("*") ? left * right : left / right; // integer division
+            tokens.set(i-1, Integer.toString(val));
+            tokens.remove(i);
+            tokens.remove(i);
+            i--;
         }
     }
 
-    double result = Double.parseDouble(tokens.get(0));
+    int result = Integer.parseInt(tokens.get(0));
     for (int i = 1; i < tokens.size(); i += 2) {
         String op = tokens.get(i);
-        double val = Double.parseDouble(tokens.get(i+1));
+        int val = Integer.parseInt(tokens.get(i+1));
         if (op.equals("+")) result += val;
         else result -= val;
     }
     return result;
 }
+
 
 
 
