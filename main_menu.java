@@ -626,8 +626,12 @@ static String rainbowPrefix(int x, int row, int totalRows)
 					else 
                     {
 						System.out.printf("Computer (%s) is thinking...\n", token(current));
-						List<Integer> moves = getValidMoves();
-						int move = moves.get(rng.nextInt(moves.size()));
+						//List<Integer> moves = getValidMoves();
+						//int move = moves.get(rng.nextInt(moves.size()));
+
+                        int searchDepth = pickSearchDepth(); // tahta boyutuna göre makul derinlik
+                        int move = chooseAIMove(current, searchDepth);
+
 						System.out.printf("Computer plays column %d.\n", move + 1);
 						makeMove(move, current);
 						sleep(300);
@@ -651,6 +655,7 @@ static String rainbowPrefix(int x, int row, int totalRows)
 					makeMove(col, current);
 				}
 
+                
 				if (isWinningMove(current)) 
                 {
 					clearConsole();
@@ -732,6 +737,311 @@ static String rainbowPrefix(int x, int row, int totalRows)
             }
         }
     }
+
+    /**
+     * checks if any of the players are in the winning condition
+     * @return if any of the players have won, or if the board is full (draw)
+     */
+    static boolean isTerminal() 
+    {
+        return isWinningMove(P1) || isWinningMove(P2) || isFull();
+    }
+
+    /**
+     * When we look at moves deep in the tree, if we have a big tree (bigger matrix and number of moves) we wont go so deep.
+     * @return the depth level
+     */
+static int pickSearchDepth()
+{
+    int cells = rows * cols;
+    if (cells <= 24) 
+         return 7;  // 5x4 
+    if (cells <= 30) 
+        return 6;  // 6x5
+    return 5;// 7x6 
+}
+
+/**
+ * Minimax search algorithm with alpha-beta pruning optimization.
+ * Recursively explores possible move sequences and returns an evaluation score.
+ *
+ * @param board The board to evaluate.
+ * @param heightsCopy The height array for this board.
+ * @param depth The current search depth.
+ * @param maximizing True if maximizing for the AI, false for minimizing (human).
+ * @param aiPlayer The AI player's token (P1 or P2).
+ * @param alpha The current alpha bound.
+ * @param beta The current beta bound.
+ * @return The evaluation score for the position.
+ */
+static int minimax(int[][] board, int[] heightsCopy, int depth, boolean maximizing, int aiPlayer, int alpha, int beta) 
+{
+    int human = opponent(aiPlayer);
+
+    if (depth == 0 || isTerminal(board, heightsCopy)) {
+        if (isWinningMove(board, aiPlayer)) return 1_000_000 - depth;
+        if (isWinningMove(board, human)) return -1_000_000 + depth;
+        return scorePosition(board, aiPlayer);
+    }
+
+    if (maximizing) {
+        int value = Integer.MIN_VALUE;
+        for (int col : orderedValidMoves(board, heightsCopy)) {
+            int[][] b2 = copyBoard(board);
+            int[] h2 = Arrays.copyOf(heightsCopy, heightsCopy.length);
+            makeMove_minmax(b2, h2, col, aiPlayer);
+            int child = minimax(b2, h2, depth - 1, false, aiPlayer, alpha, beta);
+            value = Math.max(value, child);
+            alpha = Math.max(alpha, value);
+            if (alpha >= beta) break; // prune
+        }
+        return value;
+    } else {
+        int value = Integer.MAX_VALUE;
+        for (int col : orderedValidMoves(board, heightsCopy)) {
+            int[][] b2 = copyBoard(board);
+            int[] h2 = Arrays.copyOf(heightsCopy, heightsCopy.length);
+            makeMove_minmax(b2, h2, col, human);
+            int child = minimax(b2, h2, depth - 1, true, aiPlayer, alpha, beta);
+            value = Math.min(value, child);
+            beta = Math.min(beta, value);
+            if (alpha >= beta) break; // prune
+        }
+        return value;
+    }
+}
+
+
+static int scoreWindow(int r, int c, int dr, int dc, int player, int opponent) {
+    int my = 0, opp = 0, empty = 0;
+    for (int k = 0; k < 4; k++) {
+        int v = grid[r + k*dr][c + k*dc];
+        if (v == player) my++;
+        else if (v == opponent) opp++;
+        else empty++;
+    }
+    if (my > 0 && opp > 0) return 0;
+    if (my == 4) return 100000;      // extra winning points
+    if (opp == 4) return -100000;    // rakip kazanmışsa büyük ceza (bir üst dal engeller)
+    if (my == 3 && empty == 1) return 500;
+    if (my == 2 && empty == 2) return 50;
+    if (opp == 3 && empty == 1) return -400; // rakibin 3'lü tehdidine güçlü ceza
+    if (opp == 2 && empty == 2) return -40;
+    return 0;
+}
+
+/**
+ * Evaluates the strength of a given board position for a player.
+ * This heuristic function is used by the minimax algorithm to guide search.
+ *
+ * @param board The board to evaluate.
+ * @param player The player whose perspective is being evaluated.
+ * @return A numerical score (higher means better for this player).
+ */
+static int scorePosition(int[][] board, int player) {
+    int opponent = opponent(player);
+    int rowsLocal = board.length, colsLocal = board[0].length;
+    int score = 0;
+
+    // Center column preference (strategically strongest area)
+    int center = colsLocal / 2;
+    int centerCount = 0;
+    for (int r = 0; r < rowsLocal; r++) if (board[r][center] == player) centerCount++;
+    score += centerCount * 6;
+
+    // Evaluate all 4-cell windows
+    for (int r = 0; r < rowsLocal; r++)
+        for (int c = 0; c + 3 < colsLocal; c++)
+            score += scoreWindow(board, r, c, 0, 1, player, opponent); // horizontal
+
+    for (int r = 0; r + 3 < rowsLocal; r++)
+        for (int c = 0; c < colsLocal; c++)
+            score += scoreWindow(board, r, c, 1, 0, player, opponent); // vertical
+
+    for (int r = 0; r + 3 < rowsLocal; r++)
+        for (int c = 0; c + 3 < colsLocal; c++)
+            score += scoreWindow(board, r, c, 1, 1, player, opponent); // diagonal down-right
+
+    for (int r = 3; r < rowsLocal; r++)
+        for (int c = 0; c + 3 < colsLocal; c++)
+            score += scoreWindow(board, r, c, -1, 1, player, opponent); // diagonal up-right
+
+    return score;
+}
+
+
+/**
+ * Creates a deep copy of the given board array.
+ * Used by the minimax algorithm to simulate moves without modifying the global board.
+ *
+ * @param src The source board to copy.
+ * @return A deep copy of the board.
+ */
+static int[][] copyBoard(int[][] src) {
+    int[][] copy = new int[src.length][src[0].length];
+    for (int r = 0; r < src.length; r++) System.arraycopy(src[r], 0, copy[r], 0, src[r].length);
+    return copy;
+}
+
+/**
+ * Simulates placing a piece on a copied board for minimax evaluation.
+ * This method does not modify the global board.
+ *
+ * @param board The board to modify (copy of the real grid).
+ * @param heightsCopy The heights array associated with the board.
+ * @param col The column where the piece will be dropped.
+ * @param player The player making the move (P1 or P2).
+ */
+static void makeMove_minmax(int[][] board, int[] heightsCopy, int col, int player) {
+    int row = board.length - 1 - heightsCopy[col];
+    board[row][col] = player;
+    heightsCopy[col]++;
+}
+
+/**
+ * Returns a list of valid columns (available moves) for a given board state.
+ *
+ * @param board The current board to check.
+ * @param heightsCopy The heights array tracking column fill levels.
+ * @return A list of column indices that can still accept a piece.
+ */
+static List<Integer> getValidMoves(int[][] board, int[] heightsCopy) {
+    List<Integer> moves = new ArrayList<>();
+    int rowsLocal = board.length, colsLocal = board[0].length;
+    for (int c = 0; c < colsLocal; c++) if (heightsCopy[c] < rowsLocal) moves.add(c);
+    return moves;
+}
+
+/**
+ * Sorts the valid moves so that central columns are evaluated first.
+ * Improves alpha-beta pruning efficiency by exploring stronger moves earlier.
+ *
+ * @param board The current board.
+ * @param heightsCopy The heights array for this board.
+ * @return A list of valid columns sorted by proximity to the board center.
+ */
+static List<Integer> orderedValidMoves(int[][] board, int[] heightsCopy) {
+    List<Integer> moves = getValidMoves(board, heightsCopy);
+    int colsLocal = board[0].length;
+    moves.sort((a, b) -> Integer.compare(Math.abs(a - colsLocal / 2), Math.abs(b - colsLocal / 2)));
+    return moves;
+}
+
+/**
+ * Checks if a given player has achieved a four-in-a-row on a copied board.
+ *
+ * @param board The board to check.
+ * @param player The player to test (P1 or P2).
+ * @return True if the player has a connect-four, otherwise false.
+ */
+static boolean isWinningMove(int[][] board, int player) {
+    int rowsLocal = board.length, colsLocal = board[0].length;
+    for (int r = 0; r < rowsLocal; r++) {
+        for (int c = 0; c < colsLocal; c++) {
+            if (board[r][c] != player) continue;
+            if (c + 3 < colsLocal &&
+                board[r][c + 1] == player && board[r][c + 2] == player && board[r][c + 3] == player) return true;
+            if (r + 3 < rowsLocal &&
+                board[r + 1][c] == player && board[r + 2][c] == player && board[r + 3][c] == player) return true;
+            if (r + 3 < rowsLocal && c + 3 < colsLocal &&
+                board[r + 1][c + 1] == player && board[r + 2][c + 2] == player && board[r + 3][c + 3] == player) return true;
+            if (r - 3 >= 0 && c + 3 < colsLocal &&
+                board[r - 1][c + 1] == player && board[r - 2][c + 2] == player && board[r - 3][c + 3] == player) return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Checks if the given board is completely filled (draw condition).
+ *
+ * @param heightsCopy The column heights for this board.
+ * @param rowsLocal The number of rows in the board.
+ * @return True if the board is full, otherwise false.
+ */
+static boolean isFull(int[] heightsCopy, int rowsLocal) {
+    for (int h : heightsCopy) if (h < rowsLocal) return false;
+    return true;
+}
+
+/**
+ * Determines whether the game state is terminal (win or draw).
+ *
+ * @param board The board to check.
+ * @param heightsCopy The column heights array.
+ * @return True if the position is terminal, otherwise false.
+ */
+static boolean isTerminal(int[][] board, int[] heightsCopy) {
+    return isWinningMove(board, P1) || isWinningMove(board, P2) || isFull(heightsCopy, board.length);
+}
+
+
+
+/**
+ * Scores a 4-cell "window" on the board based on the player's and opponent's pieces.
+ *
+ * @param board The board.
+ * @param r Starting row of the window.
+ * @param c Starting column of the window.
+ * @param dr Row direction increment.
+ * @param dc Column direction increment.
+ * @param player The player being evaluated.
+ * @param opponent The opposing player.
+ * @return The score contribution from this window.
+ */
+static int scoreWindow(int[][] board, int r, int c, int dr, int dc, int player, int opponent) {
+    int my = 0, opp = 0, empty = 0;
+    for (int k = 0; k < 4; k++) {
+        int v = board[r + k * dr][c + k * dc];
+        if (v == player) my++;
+        else if (v == opponent) opp++;
+        else empty++;
+    }
+    if (my > 0 && opp > 0) return 0;
+    if (my == 4) return 100000;
+    if (opp == 4) return -100000;
+    if (my == 3 && empty == 1) return 500;
+    if (my == 2 && empty == 2) return 50;
+    if (opp == 3 && empty == 1) return -400;
+    if (opp == 2 && empty == 2) return -40;
+    return 0;
+}
+
+/**
+ * Chooses the best move for the AI using minimax with alpha-beta pruning.
+ *
+ * @param aiPlayer The AI player (P1 or P2).
+ * @param depth The maximum search depth.
+ * @return The column index that represents the best move.
+ */
+static int chooseAIMove(int aiPlayer, int depth) {
+    int bestCol = -1;
+    int bestScore = Integer.MIN_VALUE;
+
+    for (int col : orderedValidMoves(grid, heights)) {
+        int[][] b2 = copyBoard(grid);
+        int[] h2 = Arrays.copyOf(heights, heights.length);
+        makeMove_minmax(b2, h2, col, aiPlayer);
+
+        int score = isWinningMove(b2, aiPlayer)
+                ? 1_000_000
+                : minimax(b2, h2, depth - 1, false, aiPlayer, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestCol = col;
+        }
+    }
+
+    if (bestCol == -1) {
+        List<Integer> ms = getValidMoves();
+        bestCol = ms.isEmpty() ? 0 : ms.get(0);
+    }
+    return bestCol;
+}
+
+
+
 
 
     static void printTitle()
@@ -978,4 +1288,3 @@ static String rainbowPrefix(int x, int row, int totalRows)
 
 
 	}
-
