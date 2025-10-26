@@ -165,7 +165,13 @@ static String rainbowPrefix(int x, int row, int totalRows)
     }
 }
 
+
+
 // @@@@@@@@ secondary school task b
+
+/**
+ * secondary school menu
+ */
 static void secschoolMenu() {
     Scanner sc = new Scanner(System.in);
     while (true) {
@@ -180,55 +186,76 @@ static void secschoolMenu() {
         switch (opt) {
             case "A" -> primeNums();
             case "B" -> expressionEv();
-            case "C" -> { clearConsole(); callMenu(); return; }
+            case "C" -> {
+                clearConsole();
+                callMenu();
+                return;
+            }
             default -> System.err.println("Wrong, try again");
         }
     }
 }
 
+// prime number task
+
+/**
+ * runs the Sieve of Eratosthenes, Sieve of Sundaram, and Sieve of
+Atkin algorithms
+ */
 static void primeNums() {
     Scanner sc = new Scanner(System.in);
-    int n;
-    final int MAX = 20_000_000;
+    int n = 0;
 
     while (true) {
-        System.out.printf("Enter an integer greater than 12 (max %d): ", MAX);
+        System.out.print("Enter an integer greater than or equal to 12: ");
+        String input = sc.nextLine().trim();
+
         try {
-            n = Integer.parseInt(sc.nextLine().trim());
-            if (n >= 12 && n <= MAX) break;
-        } catch (Exception ignored) {}
-        System.err.println("wrong, try again");
+            n = Integer.parseInt(input);
+            if (n >= 12) break;
+            System.err.println("Number must be >= 12. Try again.");
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid number format, please re-enter.");
+        }
     }
 
-    long t1 = System.currentTimeMillis();
-    List<Integer> e = sieveEratosthenes(n);
-    long t2 = System.currentTimeMillis();
+    try {
+        // Eratosthenes 
+        long t1 = System.currentTimeMillis();
+        List<Integer> e = sieveEratosthenes(n);
+        long t2 = System.currentTimeMillis();
 
-    List<Integer> s = new ArrayList<>();
-    boolean sundaramSafe = n <= 1_000_000; 
-    if (sundaramSafe) {
-        long tS = System.currentTimeMillis();
-        s = sieveSundaram(n);
-        long tS2 = System.currentTimeMillis();
-        System.out.println("\nSundaram Algorithm (" + (tS2 - tS) + " ms)");
+        // Sundaram 
+        long t3 = System.currentTimeMillis();
+        List<Integer> s = sieveSundaram(n);
+        long t4 = System.currentTimeMillis();
+
+        // Atkin 
+        long t5 = System.currentTimeMillis();
+        List<Integer> a = sieveAtkin(n);
+        long t6 = System.currentTimeMillis();
+
+        System.out.println("\n  Eratosthenes   (" + (t2 - t1) + " ms)");
+        printPrimeSample(e);
+        System.out.println("\n  Sundaram   (" + (t4 - t3) + " ms)");
         printPrimeSample(s);
-    } else {
-        System.out.println("\nSundaram Algorithm skipped");
+        System.out.println("\n  Atkin   (" + (t6 - t5) + " ms)");
+        printPrimeSample(a);
+
+    } catch (OutOfMemoryError memErr) {
+        System.err.println("Memory overflow, the input too large for available memory.");
+    } catch (Exception ex) {
+        System.err.println("Unexpected error: " + ex.getMessage());
     }
-
-    long t3 = System.currentTimeMillis();
-    List<Integer> a = sieveAtkin(n);
-    long t4 = System.currentTimeMillis();
-
-    System.out.println("\nEratosthenes Algorithm (" + (t2 - t1) + " ms)");
-    printPrimeSample(e);
-    System.out.println("\nAtkin Algorithm (" + (t4 - t3) + " ms)");
-    printPrimeSample(a);
 
     System.out.print("\nPress enter to go back");
     sc.nextLine();
 }
 
+/**
+ * Prints the first 3 and last 2 primes from a list.
+ * @param primes this is a list of generated prime numbers
+ */
 static void printPrimeSample(List<Integer> primes) {
     if (primes.size() < 5) System.out.println(primes);
     else {
@@ -237,58 +264,97 @@ static void printPrimeSample(List<Integer> primes) {
     }
 }
 
+/**
+ * Implements the Sieve of Eratosthenes algorithm.
+ */
 static List<Integer> sieveEratosthenes(int n) {
-    boolean[] prime = new boolean[n + 1];
-    Arrays.fill(prime, true);
-    prime[0] = prime[1] = false;
-    for (int i = 2; i * i <= n; i++)
-        if (prime[i])
-            for (int j = i * i; j <= n; j += i)
-                prime[j] = false;
-    List<Integer> list = new ArrayList<>();
-    for (int i = 2; i <= n; i++) if (prime[i]) list.add(i);
-    return list;
+    try {
+        boolean[] prime = new boolean[n + 1];
+        Arrays.fill(prime, true);
+        prime[0] = prime[1] = false;
+        for (int i = 2; i * i <= n; i++)
+            if (prime[i])
+                for (int j = i * i; j <= n; j += i)
+                    prime[j] = false;
+        List<Integer> list = new ArrayList<>();
+        for (int i = 2; i <= n; i++) if (prime[i]) list.add(i);
+        return list;
+    } catch (OutOfMemoryError e) {
+        System.err.println("Memory overflow inside Eratosthenes sieve.");
+        return new ArrayList<>();
+    }
 }
 
+/**
+ * Implements the Sieve of Sundaram algorithm with overflow and memory safety.
+ */
 static List<Integer> sieveSundaram(int n) {
-    int m = (n - 1) / 2;
-    boolean[] marked = new boolean[m + 1];
-    for (int i = 1; i <= m; i++)
-        for (int j = i; (long)i + j + 2L*i*j <= m; j++)
-            marked[(int)((long)i + j + 2L*i*j)] = true;
+    if (n < 2) return new ArrayList<>();
 
-    List<Integer> list = new ArrayList<>();
-    if (n > 2) list.add(2);
-    for (int i = 1; i <= m; i++)
-        if (!marked[i]) list.add(2 * i + 1);
-    return list;
-}
+    int limit = (n - 2) / 2;
+    boolean[] marked;
 
-static List<Integer> sieveAtkin(int n) {
-    boolean[] sieve = new boolean[n + 1];
-    int sqrt = (int)Math.sqrt(n);
-    for (int x = 1; x <= sqrt; x++) {
-        for (int y = 1; y <= sqrt; y++) {
-            int num = 4*x*x + y*y;
-            if (num <= n && (num % 12 == 1 || num % 12 == 5)) sieve[num] ^= true;
-            num = 3*x*x + y*y;
-            if (num <= n && num % 12 == 7) sieve[num] ^= true;
-            num = 3*x*x - y*y;
-            if (x > y && num <= n && num % 12 == 11) sieve[num] ^= true;
+    try {
+        marked = new boolean[limit + 1];
+    } catch (OutOfMemoryError e) {
+        System.err.println("Memory overflow inside Sundaram sieve. Try a smaller number.");
+        return new ArrayList<>();
+    }
+
+    for (int i = 1; i <= limit; i++) {
+        for (int j = i; ; j++) {
+            long idx = (long) i + j + 2L * i * j;
+            if (idx > limit) break;
+            marked[(int) idx] = true;
         }
     }
-    for (int i = 5; i <= sqrt; i++)
-        if (sieve[i])
-            for (int j = i*i; j <= n; j += i*i)
-                sieve[j] = false;
 
-    List<Integer> list = new ArrayList<>();
-    if (n > 2) list.add(2);
-    if (n > 3) list.add(3);
-    for (int i = 5; i <= n; i++) if (sieve[i]) list.add(i);
-    return list;
+    List<Integer> primes = new ArrayList<>();
+    if (n > 2) primes.add(2);
+    for (int i = 1; i <= limit; i++) {
+        if (!marked[i]) primes.add(2 * i + 1);
+    }
+    return primes;
 }
 
+/**
+ * Implements the Sieve of Atkin algorithm with safe memory handling.
+ */
+static List<Integer> sieveAtkin(int n) {
+    try {
+        boolean[] sieve = new boolean[n + 1];
+        int sqrt = (int) Math.sqrt(n);
+        for (int x = 1; x <= sqrt; x++) {
+            for (int y = 1; y <= sqrt; y++) {
+                int num = 4 * x * x + y * y;
+                if (num <= n && (num % 12 == 1 || num % 12 == 5)) sieve[num] ^= true;
+                num = 3 * x * x + y * y;
+                if (num <= n && num % 12 == 7) sieve[num] ^= true;
+                num = 3 * x * x - y * y;
+                if (x > y && num <= n && num % 12 == 11) sieve[num] ^= true;
+            }
+        }
+        for (int i = 5; i <= sqrt; i++)
+            if (sieve[i])
+                for (int j = i * i; j <= n; j += i * i)
+                    sieve[j] = false;
+
+        List<Integer> list = new ArrayList<>();
+        if (n > 2) list.add(2);
+        if (n > 3) list.add(3);
+        for (int i = 5; i <= n; i++) if (sieve[i]) list.add(i);
+        return list;
+    } catch (OutOfMemoryError e) {
+        System.err.println("Memory overflow inside Atkin sieve. Try a smaller number.");
+        return new ArrayList<>();
+    }
+}
+
+// expression evaluation
+
+/**
+ * performs arithmetic expression evaluation.
+ */
 static void expressionEv() {
     Scanner sc = new Scanner(System.in);
     while (true) {
@@ -297,21 +363,30 @@ static void expressionEv() {
         if (expr.equalsIgnoreCase("q")) return;
 
         if (!isValidExpression(expr)) {
-            System.err.println("Wrong expression, try again\n");
+            System.err.println("Re-enter a valid expression\n");
             continue;
         }
 
         expr = expr.replace('x', '*').replace(':', '/');
-        System.out.println("full evaluation:");
-        recursiveEval(expr);
+        System.out.println("Expression evaluation:");
+
+        try {
+            recursiveEval(expr);
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+
         System.out.print("\nPress enter to go back");
         sc.nextLine();
         return;
     }
 }
 
+/**
+ * Validates an arithmetic expression to ensure it only contains safe characters.
+ */
 static boolean isValidExpression(String s) {
-    if (!Pattern.matches("[0-9+\\-x:\\(\\)\\s]+", s)) return false;
+    if (!Pattern.matches("[0-9+\\-x:\\(\\)*/\\s]+", s)) return false;
     int bal = 0;
     for (char c : s.toCharArray()) {
         if (c == '(') bal++;
@@ -321,30 +396,43 @@ static boolean isValidExpression(String s) {
     return bal == 0;
 }
 
-static void recursiveEval(String expr) {
+/**
+ * evaluates a mathematical expression and prints each step.
+ */
+static void recursiveEval(String expr) throws Exception {
     expr = expr.replaceAll("\\s+", "");
-    try {
-        while (expr.contains("(")) {
-            int close = expr.indexOf(')');
-            int open = expr.lastIndexOf('(', close);
-            int val = evaluateFlat(expr.substring(open + 1, close));
-            expr = expr.substring(0, open) + val + expr.substring(close + 1);
-            System.out.println(expr);
-        }
-        int result = evaluateFlat(expr);
-        System.out.println("= " + result);
 
-    } catch (Exception e) {
-        System.err.println("Evaluation error: " + e.getMessage());
+    while (expr.contains("(")) {
+        int close = expr.indexOf(')');
+        int open = expr.lastIndexOf('(', close);
+        String inside = expr.substring(open + 1, close);
+
+        int val = evaluateFlat(inside, false);
+
+        expr = expr.substring(0, open) + val + expr.substring(close + 1);
+
+        System.out.println("= " + expr);
     }
+
+    int result = evaluateFlat(expr, true);
+    System.out.println("= " + result);
 }
 
-static int evaluateFlat(String expr) {
+/**
+ * Evaluates a flat (no parentheses) arithmetic expression step by step.
+ * Every step is printed with an '=' prefix if printSteps is true.
+ */
+static int evaluateFlat(String expr, boolean printSteps) throws Exception {
+    if (!expr.matches("[-0-9+*/]+")) {
+        throw new Exception("Unsafe or invalid expression.");
+    }
+
     List<String> tokens = new ArrayList<>();
     StringBuilder num = new StringBuilder();
+
     for (int i = 0; i < expr.length(); i++) {
         char c = expr.charAt(i);
-        if (Character.isDigit(c) || (c == '-' && (i == 0 || "+-*/".indexOf(expr.charAt(i-1)) != -1))) {
+        if (Character.isDigit(c) || (c == '-' && (i == 0 || "+-*/".indexOf(expr.charAt(i - 1)) != -1))) {
             num.append(c);
         } else if ("+-*/".indexOf(c) != -1) {
             tokens.add(num.toString());
@@ -356,29 +444,35 @@ static int evaluateFlat(String expr) {
 
     for (int i = 0; i < tokens.size(); i++) {
         if (tokens.get(i).equals("*") || tokens.get(i).equals("/")) {
-            int left = Integer.parseInt(tokens.get(i-1));
-            int right = Integer.parseInt(tokens.get(i+1));
-            int val = tokens.get(i).equals("*") ? left * right : left / right; // integer division
-            tokens.set(i-1, Integer.toString(val));
+            int left = Integer.parseInt(tokens.get(i - 1));
+            int right = Integer.parseInt(tokens.get(i + 1));
+            int val = tokens.get(i).equals("*") ? left * right : left / right;
+            tokens.set(i - 1, Integer.toString(val));
             tokens.remove(i);
             tokens.remove(i);
             i--;
+            if (printSteps) System.out.println("= " + String.join("", tokens));
         }
     }
 
     int result = Integer.parseInt(tokens.get(0));
     for (int i = 1; i < tokens.size(); i += 2) {
         String op = tokens.get(i);
-        int val = Integer.parseInt(tokens.get(i+1));
-        if (op.equals("+")) result += val;
-        else result -= val;
+        int val = Integer.parseInt(tokens.get(i + 1));
+        result = op.equals("+") ? result + val : result - val;
+
+        if (printSteps && i < tokens.size() - 2) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(result);
+            for (int j = i + 2; j < tokens.size(); j++) {
+                sb.append(tokens.get(j));
+            }
+            System.out.println("= " + sb.toString());
+        }
     }
+
     return result;
 }
-
-
-
-
 
 //-------------------------------------------------- CONNECT FOUR ---------------------------------------------------
 //i will add AI later
