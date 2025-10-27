@@ -91,6 +91,9 @@ public class main_menu
 	}
 
 
+    /**
+     * Plays the ASCII animation.
+     */
 static void playNyanCat() 
 {
     final String nyanCat = """
@@ -122,13 +125,13 @@ static void playNyanCat()
 
      String[] raw = nyanCat.split("\n");
 
-    int steps = 80; // number of steps the cat will make
+    int steps = 80; // number of steps the cat will take
     for (int x = 0; x <= steps; x++) 
 	{
         clearConsole();                  
         for (int r = 0; r < raw.length; r++)
 		{
-			 String indent = rainbowPrefix(x, r, raw.length); 
+			String indent = rainbowPrefix(x, r, raw.length); 
         	System.out.println(indent + raw[r]);
 		}        
         try { Thread.sleep(20); } catch (InterruptedException ignored) {}
@@ -137,10 +140,11 @@ static void playNyanCat()
 	}
 }
 
-//*Displays the welcome message */
+/**
+ * Displays the welcome message in blue color.
+ */
 static void showWelcomeScreen()
 {
-    
    String banner =  BLUE_FG + """
   _     _  _______  ___      _______  _______  __   __  _______    ___   ____   
 | | _ | ||       ||   |    |       ||       ||  |_|  ||       |  |   | |    |  
@@ -155,10 +159,16 @@ System.out.println(banner);
 
 }
 
-//for the rainbow trail behind the cat
+/**
+ * Displays a rainbow trail behind the cat.
+ * @param x
+ * @param row
+ * @param totalRows
+ * @return
+ */
 static String rainbowPrefix(int x, int row, int totalRows)
 {
-	//* ANSI codes for the rainbow trail behind the kitty */
+	//ANSI codes for the rainbow trail behind the kitty 
     final String RESET   = "\033[0m";
     final String RED     = "\033[38;5;196m";
     final String ORANGE  = "\033[38;5;208m";
@@ -169,7 +179,7 @@ static String rainbowPrefix(int x, int row, int totalRows)
     String[] palette = { RED, ORANGE, YELLOW, GREEN, BLUE, MAGENTA };
 
     int stripes = 6;
-    int top = Math.max(0, totalRows/2 - stripes/2); //top of the stripes, this centers rhe body of the cat, so the rainbow starts from the middle of it
+    int top = Math.max(0, totalRows/2 - stripes/2); //top of the stripes, this centers the body of the cat, so the rainbow starts from the middle of it
     boolean isStripe = row >= top && row < top + stripes;
 
     if (!isStripe)
@@ -568,189 +578,191 @@ static String rainbowPrefix(int x, int row, int totalRows)
 		static final String BLUE_FG   = "\u001B[38;5;45m";
 		static final String GRAY_FG   = "\u001B[38;5;240m";
 
-        /*
-         * Connect Four game function.
-         */
-		static void connectFour()
-		{
-			Scanner sc = new Scanner(System.in);
-        	printTitle();
+/**
+ * The main function that runs the Connect Four game.
+ * This method manages the entire game loop; from player setup to move execution,
+ * win detection, and post-game options. It supports both: Single-player mode (vs. computer using minimax AI) && Two-player local mode.
+ * AI uses Minimax + Alpha-Beta pruning.
+ * After each move, the screen refreshes and the updated board is rendered in ASCII with colors.
+ * The game checks for a win condition or a tie.
+ * At the end, the winner or draw message is displayed. Then the player can choose to go back to the main menu or replay.
+ */
+static void connectFour()
+{
+    Scanner sc = new Scanner(System.in);
+    printTitle();
 
-			int[] size = pickSize(sc); // [cols, rows]
-			cols = size[0];
-			rows = size[1];
-			initBoard(rows, cols);
+    int[] size = pickSize(sc); // [cols, rows]
+    cols = size[0];
+    rows = size[1];
+    initBoard(rows, cols);
 
-			int mode = pickMode(sc);
+    int mode = pickMode(sc);
 
-			int humanPlayer = P1; // player 1
-			if (mode == 1)
-			{
-				 // single player
-				humanPlayer = pickHumanSide(sc);
-			}
+    int humanPlayer = P1; // player 1
+    if (mode == 1)
+    {
+            // single player
+        humanPlayer = pickHumanSide(sc);
+    }
 
-			int current = P1;
-			boolean gameOver = false;
-			Integer forfeitWinner = null;
-			Random rng = new Random();
+    int current = P1;
+    boolean gameOver = false;
+    Integer forfeitWinner = null;
 
-			while (!gameOver) 
-            {
-				clearConsole();
-				printTitle();
-				System.out.println(render());
+    while (!gameOver) 
+    {
+        clearConsole();
+        printTitle();
+        System.out.println(render());
 
-				if (mode == 1)
-				{
-					if (current == humanPlayer) 
-					{
-						System.out.printf("Player %s (You), choose a column 1-%d or 'q' to forfeit: ", token(current), cols);
-						String in = sc.nextLine().trim();
-
-                        //*Returns true if the strings are equal */
-						if (in.equalsIgnoreCase("q")) 
-                        {
-							forfeitWinner = opponent(current);
-							break;
-						}
-						Integer col = parseColumn(in, cols);
-						if (col == null) continue;
-						if (!isValidMove(col)) {
-							System.out.println("\nColumn is full. Pick another.");
-							pause(sc);
-							continue;
-						}
-						makeMove(col, current);
-					} 
-					else 
-                    {
-						System.out.printf("Computer (%s) is thinking...\n", token(current));
-						//List<Integer> moves = getValidMoves();
-						//int move = moves.get(rng.nextInt(moves.size()));
-
-                        int searchDepth = pickSearchDepth(); // tahta boyutuna göre makul derinlik
-                        int move = chooseAIMove(current, searchDepth);
-
-						System.out.printf("Computer plays column %d.\n", move + 1);
-						makeMove(move, current);
-						sleep(300);
-					}
-				}
-				 else 
-				 {
-					System.out.printf("Player %s, choose a column 1-%d or 'q' to forfeit: ", token(current), cols);
-					String in = sc.nextLine().trim();
-					if (in.equalsIgnoreCase("q")) {
-						forfeitWinner = opponent(current);
-						break;
-					}
-					Integer col = parseColumn(in, cols);
-					if (col == null) continue;
-					if (!isValidMove(col)) {
-						System.out.println("\nColumn is full. Pick another.");
-						pause(sc);
-						continue;
-					}
-					makeMove(col, current);
-				}
-
-                
-				if (isWinningMove(current)) 
-                {
-					clearConsole();
-					printTitle();
-					System.out.println(render());
-					if (mode == 1 && current != humanPlayer) 
-                    {
-						System.out.printf("Computer (%s) wins!\n", token(current));
-					} 
-                    else if (mode == 1 && current == humanPlayer) 
-                    {
-						System.out.println("You win!");
-					}
-                    else
-                    {
-						System.out.printf("Player %s wins!\n", token(current));
-					}
-					gameOver = true;
-				} 
-                else if (isFull()) 
-                {
-					clearConsole();
-					printTitle();
-					System.out.println(render());
-					System.out.println("It's a draw.");
-					gameOver = true;
-				} 
-                else 
-                {
-					current = opponent(current);
-				}
-			}
-
-			if (forfeitWinner != null)
-            {
-				clearConsole();
-				printTitle();
-				System.out.println(render());
-				if (mode == 1 && forfeitWinner != humanPlayer) 
-                {
-					System.out.printf("You forfeited. Computer (%s) wins.\n", token(forfeitWinner));
-				} 
-                else if (mode == 1 && forfeitWinner == humanPlayer)
-                {
-					System.out.println("Computer forfeited. You win!");
-				} 
-                else 
-                {
-					System.out.printf("Player %s wins by forfeit.\n", token(forfeitWinner));
-				}
-			}
-
-        //After the game ends, we ask the user if they want to return or play again.
-        while(true)
+        if (mode == 1)
         {
-            System.out.println("\nThanks for playing! \n Would you like to play again or return to the main menu?");
-            System.out.println("1) Play again! ");
-            System.out.println("2) Return to Main Menu.");
-
-            Scanner input = new Scanner(System.in);
-            String ans = input.nextLine().trim();
-
-            if (ans.equals("1"))
+            if (current == humanPlayer) 
             {
-                clearConsole();
-                connectFour();
+                System.out.printf("Player %s (You), choose a column 1-%d or 'q' to forfeit: ", token(current), cols);
+                String in = sc.nextLine().trim();
+
+                //*Returns true if the strings are equal */
+                if (in.equalsIgnoreCase("q")) 
+                {
+                    forfeitWinner = opponent(current);
+                    break;
+                }
+                Integer col = parseColumn(in, cols);
+                if (col == null) continue;
+                if (!isValidMove(col)) {
+                    System.out.println("\nColumn is full. Pick another.");
+                    pause(sc);
+                    continue;
+                }
+                makeMove(col, current);
+            } 
+            else 
+            {
+                System.out.printf("Computer (%s) is thinking...\n", token(current));
+                int searchDepth = pickSearchDepth(); // depth based on the board size
+                int move = chooseAIMove(current, searchDepth);
+
+                System.out.printf("Computer plays column %d.\n", move + 1);
+                makeMove(move, current);
+                sleep(300);
+            }
+        }
+            else 
+            {
+            System.out.printf("Player %s, choose a column 1-%d or 'q' to forfeit: ", token(current), cols);
+            String in = sc.nextLine().trim();
+            if (in.equalsIgnoreCase("q")) {
+                forfeitWinner = opponent(current);
                 break;
             }
-            else if (ans.equals("2"))
-            {
-                clearConsole();
-                callMenu();
-                break;
+            Integer col = parseColumn(in, cols);
+            if (col == null) continue;
+            if (!isValidMove(col)) {
+                System.out.println("\nColumn is full. Pick another.");
+                pause(sc);
+                continue;
+            }
+            makeMove(col, current);
+        }
 
+        
+        if (isWinningMove(current)) 
+        {
+            clearConsole();
+            printTitle();
+            System.out.println(render());
+            if (mode == 1 && current != humanPlayer) 
+            {
+                System.out.printf("Computer (%s) wins!\n", token(current));
+            } 
+            else if (mode == 1 && current == humanPlayer) 
+            {
+                System.out.println("You win!");
             }
             else
             {
-                System.err.println("Invalid input. Please try again.");
+                System.out.printf("Player %s wins!\n", token(current));
             }
+            gameOver = true;
+        } 
+        else if (isFull()) 
+        {
+            clearConsole();
+            printTitle();
+            System.out.println(render());
+            System.out.println("It's a draw.");
+            gameOver = true;
+        } 
+        else 
+        {
+            current = opponent(current);
         }
     }
 
-    /**
-     * checks if any of the players are in the winning condition
-     * @return if any of the players have won, or if the board is full (draw)
-     */
-    static boolean isTerminal() 
+    if (forfeitWinner != null)
     {
-        return isWinningMove(P1) || isWinningMove(P2) || isFull();
+        clearConsole();
+        printTitle();
+        System.out.println(render());
+        if (mode == 1 && forfeitWinner != humanPlayer) 
+        {
+            System.out.printf("You forfeited. Computer (%s) wins.\n", token(forfeitWinner));
+        } 
+        else if (mode == 1 && forfeitWinner == humanPlayer)
+        {
+            System.out.println("Computer forfeited. You win!");
+        } 
+        else 
+        {
+            System.out.printf("Player %s wins by forfeit.\n", token(forfeitWinner));
+        }
     }
 
-    /**
-     * When we look at moves deep in the tree, if we have a big tree (bigger matrix and number of moves) we wont go so deep.
-     * @return the depth level
-     */
+    //After the game ends, we ask the user if they want to return or play again.
+    while(true)
+    {
+        System.out.println("\nThanks for playing! \n Would you like to play again or return to the main menu?");
+        System.out.println("1) Play again! ");
+        System.out.println("2) Return to Main Menu.");
+
+        Scanner input = new Scanner(System.in);
+        String ans = input.nextLine().trim();
+
+        if (ans.equals("1"))
+        {
+            clearConsole();
+            connectFour();
+            break;
+        }
+        else if (ans.equals("2"))
+        {
+            clearConsole();
+            callMenu();
+            break;
+
+        }
+        else
+        {
+            System.err.println("Invalid input. Please try again.");
+        }
+    }
+}
+
+/**
+ * checks if any of the players are in the winning condition
+ * @return if any of the players have won, or if the board is full (draw)
+ */
+static boolean isTerminal() 
+{
+    return isWinningMove(P1) || isWinningMove(P2) || isFull();
+}
+
+/**
+ * When we look at moves deep in the tree, if we have a big tree (bigger matrix and number of moves) we wont go so deep so itll be efficient.
+ * @return the depth level
+ */
 static int pickSearchDepth()
 {
     int cells = rows * cols;
@@ -762,8 +774,8 @@ static int pickSearchDepth()
 }
 
 /**
- * Minimax search algorithm with alpha-beta pruning optimization.
- * Recursively explores possible move sequences and returns an evaluation score.
+ * Minimax search algorithm with alpha-beta pruning.
+ * Recursively explores possible move sequences and returns an evaluation score. 
  *
  * @param board The board to evaluate.
  * @param heightsCopy The height array for this board.
@@ -811,22 +823,41 @@ static int minimax(int[][] board, int[] heightsCopy, int depth, boolean maximizi
     }
 }
 
-
-static int scoreWindow(int r, int c, int dr, int dc, int player, int opponent) {
-    int my = 0, opp = 0, empty = 0;
-    for (int k = 0; k < 4; k++) {
+/**
+ *Evaluates a 4 cell window of the board and assigns a heuristic score.
+ * This function is used by the AI to estimate how good a given position is.
+ * @param r Starting row of the window.
+ * @param c Starting column of the window. 
+ * @param dr Row direction increment.
+ * @param dc  Column direction increment.
+ * @param player Current player.
+ * @param opponent Opposing player.
+ * @return
+ */
+static int scoreWindow(int r, int c, int dr, int dc, int player, int opponent)
+ {
+        int my = 0, opp = 0, empty = 0;
+    for (int k = 0; k < 4; k++)
+     {
         int v = grid[r + k*dr][c + k*dc];
         if (v == player) my++;
         else if (v == opponent) opp++;
         else empty++;
     }
-    if (my > 0 && opp > 0) return 0;
-    if (my == 4) return 100000;      // extra winning points
-    if (opp == 4) return -100000;    // rakip kazanmışsa büyük ceza (bir üst dal engeller)
-    if (my == 3 && empty == 1) return 500;
-    if (my == 2 && empty == 2) return 50;
-    if (opp == 3 && empty == 1) return -400; // rakibin 3'lü tehdidine güçlü ceza
-    if (opp == 2 && empty == 2) return -40;
+    if (my > 0 && opp > 0) 
+        return 0;
+    if (my == 4) 
+        return 100000;      // extra winning points
+    if (opp == 4) 
+        return -100000;    // punishment if the opponent won
+    if (my == 3 && empty == 1) 
+        return 500;
+    if (my == 2 && empty == 2) 
+        return 50;
+    if (opp == 3 && empty == 1) 
+        return -400; // if theres a threat, lesser points.
+    if (opp == 2 && empty == 2) 
+        return -40;
     return 0;
 }
 
@@ -978,7 +1009,7 @@ static boolean isTerminal(int[][] board, int[] heightsCopy) {
 
 
 /**
- * Scores a 4-cell "window" on the board based on the player's and opponent's pieces.
+ * Scores a 4-cell window on the board based on the players and opponents pieces.e
  *
  * @param board The board.
  * @param r Starting row of the window.
@@ -991,7 +1022,8 @@ static boolean isTerminal(int[][] board, int[] heightsCopy) {
  */
 static int scoreWindow(int[][] board, int r, int c, int dr, int dc, int player, int opponent) {
     int my = 0, opp = 0, empty = 0;
-    for (int k = 0; k < 4; k++) {
+    for (int k = 0; k < 4; k++)
+    {
         int v = board[r + k * dr][c + k * dc];
         if (v == player) my++;
         else if (v == opponent) opp++;
@@ -1041,250 +1073,326 @@ static int chooseAIMove(int aiPlayer, int depth) {
 }
 
 
-
-
-
-    static void printTitle()
-	{
-         clearConsole();
-		 System.out.println(BLUE_FG + """
-				                                                                      
- _____ _____ _____ _____ _____ _____ _____    _____ _____ _____ _____ 
+/**
+ * Prints the connect four game title.
+ */
+static void printTitle()
+{
+        clearConsole();
+        System.out.println(BLUE_FG + """
+                                                                                    
+_____ _____ _____ _____ _____ _____ _____    _____ _____ _____ _____ 
 |     |     |   | |   | |   __|     |_   _|  |   __|     |  |  | __  |
 |   --|  |  | | | | | | |   __|   --| | |    |   __|  |  |  |  |    -|
 |_____|_____|_|___|_|___|_____|_____| |_|    |__|  |_____|_____|__|__|
-                                                                      
-				""");
-    }
+                                                                    
+            """);
+}
 
-    static int[] pickSize(Scanner sc) 
-    {
-        while (true) {
-            System.out.println("Choose board size:");
-            System.out.println("  1) 5 x 4");
-            System.out.println("  2) 6 x 5");
-            System.out.println("  3) 7 x 6");
-            System.out.print("Enter 1-3: ");
-            String in = sc.nextLine().trim();
-            if (in.equals("1")) return new int[]{5, 4};
-            else if (in.equals("2")) return new int[]{6, 5};
-            else if (in.equals("3")) return new int[]{7, 6};
-            System.out.println("Invalid choice. Try again.\n");
-        }
-    }
-
-    static int pickMode(Scanner sc)
-    {
-        while (true)
-         {
-            System.out.println("Choose game mode:");
-            System.out.println("  1) Single-player (vs Computer, random moves)");
-            System.out.println("  2) Two players (local)");
-            System.out.print("Enter 1 or 2: ");
-
-            String in = sc.nextLine().trim();
-
-            try {
-            int choice = Integer.parseInt(in);
-            if (choice == 1 || choice == 2)
-                return choice;
-            else
-                System.out.println("Invalid choice. Try again.\n");
-            } 
-            catch (NumberFormatException e) {
-                System.err.println("Please enter a number (1 or 2 only).\n");
-            }
-        }
-    }
-
-    static int pickHumanSide(Scanner sc) 
-    {
-        while (true) {
-            System.out.println("Do you want to play first or second?");
-            System.out.println("  1) First (R)");
-            System.out.println("  2) Second (Y)");
-            System.out.print("Enter 1 or 2: ");
-            String in = sc.nextLine().trim();
-            if (in.equals("1")) return P1;
-            if (in.equals("2")) return P2;
-            System.out.println("Invalid choice. Try again.\n");
-        }
-    }
 /**
- * 
- * @param in
- * @param cols
- * @return
+ * Lets the player pick a size of the board.
+ * @param sc The input that the user enters.
+ * @return A matrix of the chosen size.
  */
-    static Integer parseColumn(String in, int cols) 
-    {
+static int[] pickSize(Scanner sc) 
+{
+    while (true) {
+        System.out.println("Choose board size:");
+        System.out.println("  1) 5 x 4");
+        System.out.println("  2) 6 x 5");
+        System.out.println("  3) 7 x 6");
+        System.out.print("Enter 1-3: ");
+        String in = sc.nextLine().trim();
+        if (in.equals("1")) 
+            return new int[]{5, 4};
+        else if (in.equals("2")) 
+            return new int[]{6, 5};
+        else if (in.equals("3")) 
+            return new int[]{7, 6};
+        System.out.println("Invalid choice. Try again.\n");
+    }
+}
+
+/**
+ * Lets the user choose the mode they want to play (single or multi player).
+ * @param sc Gets the input from the user.
+ * @return Returns the gamemode based on the users choice.
+*/
+static int pickMode(Scanner sc)
+{
+    while (true)
+        {
+        System.out.println("Choose game mode:");
+        System.out.println("  1) Single-player (vs Computer, Minimax AI)");
+        System.out.println("  2) Two players (local)");
+        System.out.print("Enter 1 or 2: ");
+
+        String in = sc.nextLine().trim();
+
         try {
-            int c = Integer.parseInt(in);
-            if (c < 1 || c > cols) {
-                System.out.println("\nOut of range.");
-                return null;
-            }
-            return c - 1; // zero-based
-        } catch (NumberFormatException e) {
-            System.out.println("\nPlease enter a number.");
+        int choice = Integer.parseInt(in);
+        if (choice == 1 || choice == 2)
+            return choice;
+        else
+            System.out.println("Invalid choice. Try again.\n");
+        } 
+        catch (NumberFormatException e) {
+            System.err.println("Please enter a number (1 or 2 only).\n");
+        }
+    }
+}
+
+/**
+ *Prompts the user to choose whether to play first (Red) or second (Yellow).
+ * @param sc Scanner to get the input.
+ * @return Returns P1 if user chooses re and P2 if the user chooses yellow.
+ */
+static int pickHumanSide(Scanner sc) 
+{
+    while (true) {
+        System.out.println("Do you want to play first or second?");
+        System.out.println("  1) First (Red)");
+        System.out.println("  2) Second (Yellow)");
+        System.out.print("Enter 1 or 2: ");
+        String in = sc.nextLine().trim();
+        if (in.equals("1")) 
+            return P1;
+        if (in.equals("2")) 
+            return P2;
+        System.out.println("Invalid choice. Try again.\n");
+    }
+}
+
+/**
+ * Parses a column input string and converts it to a zero-based column index.
+ * @param in Input string entered by the user.
+ * @param cols The total number of columns on the board.
+ * @return 0 based column index if the input is in the range.
+ */
+static Integer parseColumn(String in, int cols) 
+{
+    try {
+        int c = Integer.parseInt(in);
+        if (c < 1 || c > cols) {
+            System.out.println("\nOut of range.");
             return null;
         }
+        return c - 1; // zero-based
+    } catch (NumberFormatException e) {
+        System.out.println("\nPlease enter a number.");
+        return null;
     }
+}
 
-    static void pause(Scanner sc)
-    {
-        System.out.print("Press Enter to continue...");
-        sc.nextLine();
-    }
+/**
+ * Pauses the game flow until the user presses enter.
+ * @param sc Input for an empty line.
+ */
+static void pause(Scanner sc)
+{
+    System.out.print("Press Enter to continue...");
+    sc.nextLine();
+}
 
-    static void sleep(long ms)
-    {
-        try { 
-            Thread.sleep(ms);
-         } 
-         catch (InterruptedException ignored) {}
-    }
+/**
+ * Sleeps the current thread for the given number of milliseconds.
+ * @param ms Miliseconds to sleep.
+ */
+static void sleep(long ms)
+{
+    try { 
+        Thread.sleep(ms);
+        } 
+        catch (InterruptedException ignored) {}
+}
 
-    static int opponent(int p) //returns opponent as P2 if the player is P1
-    {
-    if (p == P1)
-        return P2;
-    else
-        return P1;
-    } 
+/**
+ * Returns the opposing player.
+ * @param p Gets the current player.
+ * @return Returns the opponent.
+ */
+static int opponent(int p) 
+{
+if (p == P1)
+    return P2;
+else
+    return P1;
+} 
+
+/**
+ * P1 is red P2 is yellow.
+ * @param p Player P1 or P2.
+ * @return Returns the R (red) or Y(yellow) based on the player.
+ */
+static String token(int p) 
+{
+if (p == P1)
+    return "R";
+else
+    return "Y";
+}
+
+/**
+ * For declaring the board.
+ * @param r number of rows.
+ * @param c number of columns.
+ */
+static void initBoard(int r, int c) 
+{
+    grid = new int[r][c];
+    heights = new int[c];
+}
+
+/**
+ * Checking if the move is in range of the grid.
+ * @param col
+ * @return
+ */
+static boolean isValidMove(int col) //checking if the move is valid 
+{
+    return col >= 0 && col < cols && heights[col] < rows;
+}
+
+/**
+ * Places a piece on the board for the given player.
+ * The piece will fall to the lowest empty row in the specified column.
+ * @param col The colum where the player wants to drop the piece.
+ * @param player The current player 
+ * @return Returns the row index where the piece was placed.
+ */
+static int makeMove(int col, int player) 
+{
+    int row = rows - 1 - heights[col];
+    grid[row][col] = player;
+    heights[col]++;
+    return row;
+}
+
+
+/**
+ * Checks whether the board is completely full.
+ * @return True if no more moves can be made.
+ */
+static boolean isFull() 
+{
+    for (int c = 0; c < cols; c++) 
+        if (heights[c] < rows)
+                return false;
+    return true;
+}
+
+/**
+ * Computes and returns the list of all valid columns the next move can be played in.
+ * A list of 0-indexed columns that arent full.
+ */
+static List<Integer> getValidMoves()
+{
+    List<Integer> moves = new ArrayList<>();
+    for (int c = 0; c < cols; c++)
+        if (isValidMove(c)) 
+            moves.add(c);
+    return moves;
+}
+
+/**
+ * Checks if current player has connected four tokens.
+ * @param player Gets the current player.
+ * @return True if there exist a winning move for this player.
+ */
+static boolean isWinningMove(int player) 
+{
     
-    static String token(int p) //p1 is red p2 is yellow
-    {
-    if (p == P1)
-        return "R";
-    else
-        return "Y";
-    }
-
-    //declaring the grid/board
-    static void initBoard(int r, int c) 
-	{
-        grid = new int[r][c];
-        heights = new int[c];
-    }
-
-    static boolean isValidMove(int col) //checking if the move is valid 
-	{
-        return col >= 0 && col < cols && heights[col] < rows;
-    }
-
-    
-    static int makeMove(int col, int player) 
-	{
-        int row = rows - 1 - heights[col];
-        grid[row][col] = player;
-        heights[col]++;
-        return row;
-    }
-
-
-    static boolean isFull() 
-	{
+    for (int r = 0; r < rows; r++)
+        {
         for (int c = 0; c < cols; c++) 
-            if (heights[c] < rows)
-                 return false;
-        return true;
-    }
-
-    static List<Integer> getValidMoves()
-	{
-        List<Integer> moves = new ArrayList<>();
-        for (int c = 0; c < cols; c++)
-            if (isValidMove(c)) 
-                moves.add(c);
-        return moves;
-    }
-
-    static boolean isWinningMove(int player) 
-	{
-       
-        for (int r = 0; r < rows; r++)
-         {
-            for (int c = 0; c < cols; c++) 
-            {
-                if (grid[r][c] != player) continue;
-                // horizontal
-                if (c + 3 < cols && grid[r][c+1] == player && grid[r][c+2] == player && grid[r][c+3] == player) 
-                    return true;
-                // vertical
-                if (r + 3 < rows && grid[r+1][c] == player && grid[r+2][c] == player && grid[r+3][c] == player) 
-                    return true;
-                // diagonal bottom
-                if (r + 3 < rows && c + 3 < cols && grid[r+1][c+1] == player && grid[r+2][c+2] == player && grid[r+3][c+3] == player) 
-                    return true;
-                // diagonal top
-                if (r - 3 >= 0 && c + 3 < cols && grid[r-1][c+1] == player && grid[r-2][c+2] == player && grid[r-3][c+3] == player) 
-                    return true;
-            }
+        {
+            if (grid[r][c] != player)
+                continue;
+            // horizontal
+            if (c + 3 < cols && grid[r][c+1] == player && grid[r][c+2] == player && grid[r][c+3] == player) 
+                return true;
+            // vertical
+            if (r + 3 < rows && grid[r+1][c] == player && grid[r+2][c] == player && grid[r+3][c] == player) 
+                return true;
+            // diagonal bottom
+            if (r + 3 < rows && c + 3 < cols && grid[r+1][c+1] == player && grid[r+2][c+2] == player && grid[r+3][c+3] == player) 
+                return true;
+            // diagonal top
+            if (r - 3 >= 0 && c + 3 < cols && grid[r-1][c+1] == player && grid[r-2][c+2] == player && grid[r-3][c+3] == player) 
+                return true;
         }
-        return false;
     }
+    return false;
+}
 
-    //rendering the pieces
-    static String pieceChar(int v)
-     {
-        if (v == P1) return RED_FG + "R" + RESET;    
-        if (v == P2) return YELLOW_FG + "Y" + RESET; 
-        return GRAY_FG + "·" + RESET;               
-    }
-
-    static String render() 
+/**
+ * Returns a colored single character(red or yellow) string representing a cell value.
+ * @param v Cell value from the board (it can be empty, P1 or P2).
+ * @return "R" for P1, "Y" for P2.
+ */
+static String pieceChar(int v)
     {
-        StringBuilder sb = new StringBuilder();
+    if (v == P1) return RED_FG + "R" + RESET;    
+    if (v == P2) return YELLOW_FG + "Y" + RESET; 
+    return GRAY_FG + "·" + RESET;               
+}
 
-        // TOP LINE
-        sb.append("   ").append("┌");
+/**
+ * Renders the current board as a colored ASCII.
+ * @return Returns the board.
+ */
+static String render() 
+{
+    StringBuilder sb = new StringBuilder();
+
+    // TOP LINE
+    sb.append("   ").append("┌");
+    for (int c = 0; c < cols; c++) {
+        sb.append("───");
+        sb.append(c == cols - 1 ? "┐" : "┬");
+    }
+    sb.append("\n");
+
+    // LINE SPACES
+    for (int r = 0; r < rows; r++) {
+        sb.append("   ").append("│");
         for (int c = 0; c < cols; c++) {
-            sb.append("───");
-            sb.append(c == cols - 1 ? "┐" : "┬");
+            String p = pieceChar(grid[r][c]); // ● ya da ·
+            sb.append(" ").append(p).append(" ");
+            sb.append("│");
         }
         sb.append("\n");
 
-        // LINE SPACES
-        for (int r = 0; r < rows; r++) {
-            sb.append("   ").append("│");
+        
+        if (r != rows - 1) {
+            sb.append("   ").append("├");
             for (int c = 0; c < cols; c++) {
-                String p = pieceChar(grid[r][c]); // ● ya da ·
-                sb.append(" ").append(p).append(" ");
-                sb.append("│");
+                sb.append("───");
+                sb.append(c == cols - 1 ? "┤" : "┼");
             }
             sb.append("\n");
-
-            
-            if (r != rows - 1) {
-                sb.append("   ").append("├");
-                for (int c = 0; c < cols; c++) {
-                    sb.append("───");
-                    sb.append(c == cols - 1 ? "┤" : "┼");
-                }
-                sb.append("\n");
-            }
         }
+    }
 
-        // BOTTOM LINE
-        sb.append("   ").append("└");
+    // BOTTOM LINE
+    sb.append("   ").append("└");
 
-        for (int c = 0; c < cols; c++) {
-            sb.append("───");
-            sb.append(c == cols - 1 ? "┘" : "┴");
-        }
-        sb.append("\n");
+    for (int c = 0; c < cols; c++) {
+        sb.append("───");
+        sb.append(c == cols - 1 ? "┘" : "┴");
+    }
+    sb.append("\n");
 
-        //BLUE COLUMN NUMBERS 
-        sb.append("    ");
-        for (int c = 1; c <= cols; c++)
-        {
-            sb.append(BLUE_FG).append(String.format(" %2d ", c)).append(RESET);
-        }
-        sb.append("\n");
+    //BLUE COLUMN NUMBERS 
+    sb.append("    ");
+    for (int c = 1; c <= cols; c++)
+    {
+        sb.append(BLUE_FG).append(String.format(" %2d ", c)).append(RESET);
+    }
+    sb.append("\n");
 
-        return sb.toString();            
-		}
+    return sb.toString();            
+    }
 
 
-	}
+}
