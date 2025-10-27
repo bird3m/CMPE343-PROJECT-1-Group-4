@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*; //for scanner,lists, random
+import java.util.regex.Pattern;
 
 
 
@@ -30,16 +31,18 @@ public class main_menu
 			{
                 playNyanCat();
                 animationFlag = true;
+                System.out.print("\033[?25h"); //show the cursor again
             }
             
             showWelcomeScreen();
-
+    
 
 			System.out.println("\nPlease select one of the options below: \n[A] Primary School");
 			System.out.println("[B] Secondary School");
 			System.out.println("[C] High School");
 			System.out.println("[D] University");
 			System.out.println("[E] Terminate");
+            System.out.println("\n[F] !Credits!\n");
 
 			Scanner input = new Scanner(System.in);
 			System.out.printf("Select one of the options above:");
@@ -60,12 +63,14 @@ public class main_menu
 			}
 			else if (str.equals("B"))
 			{
-				//call func
+				clearConsole();
+				secschoolMenu();
 				break;
 			}
 			else if (str.equals("C"))
 			{
-				//call func
+				clearConsole();
+                highschool();
 				break;
 			}
 			else if (str.equals("D"))
@@ -79,6 +84,10 @@ public class main_menu
 				System.exit(0);
 	
 			}
+            else if (str.equals("F"))
+            {
+                playCredits();
+            }
 			else
 				System.err.println("\nInvalid input. Try again!!!!!!!");
 
@@ -90,12 +99,148 @@ public class main_menu
         
 	}
 
+/**
+ * The function creates a framed window where credit lines move upward,
+ * simulating a cinematic credit roll effect. Each line can include ANSI
+ * color codes for styling, and the animation speed can be adjusted with
+ * the sleep duration between frames.
+ 
+ * Clears the console before each frame to create motion.
+ * Prints a fixed-size box where text scrolls line by line.
+ * Uses padCenterAnsi() to center lines while ignoring color codes.
+ */
+static void playCredits() 
+{
+    // Hides the cursor.
+    System.out.print("\033[?25l");
+
+
+    clearConsole();
+
+    String title = BLUE_FG +
+            "   ╔══════════════════════════════════════════════╗\n" +
+            "   ║                C  R  E  D  I  T  S           ║\n" +
+            "   ╚══════════════════════════════════════════════╝\n" +
+            RESET;
+
+
+    final int W = 72;       // box width
+    final int H = 22;       // box height
+;
+
+    String[] lines = new String[] {
+            " ",
+            "A CMPE343 Production",
+            " ",
+            "Directed by",
+            BLUE_FG + "  BİRDEM ÜSTÜNDAĞ",
+            " ",
+            PINK_FG + "  NARGIZ HUSEYNOVA",
+            " ",
+
+            GREEN_FG + "  NUR SENA CANDAN",
+            " ",
+         
+            YELLOW_FG + "  MAIMOONAH BAKR SHIHAB AL-MASHHADANI",
+            " ",
+            "Special Thanks",
+           RED_FG + "  İLKTAN AR",
+            " ",
+
+            "The End"
+    };
+
+    // The top header stays still while the credits scroll upward below.
+    // We are basically sliding the "lines" array through a visible window  that has H rows (terminal height). The offset moves from bottom to top.
+    for (int offset = H; offset >= -lines.length; offset--)
+     {
+        clearConsole();
+        System.out.print(title);
+
+        // Draw the top line
+        System.out.println("   " + "┌" + "─".repeat(W) + "┐");
+
+        // For each visible row on screen
+        for (int row = 0; row < H; row++) 
+        {
+            int idx = row - (H - offset); //Figuring out which line from our list should appear at this spot
+            String text = (idx >= 0 && idx < lines.length) ? lines[idx] : "";
+
+
+            //Center the text
+            String centered = padCenterAnsi(text, W);
+            System.out.println("   │" + centered + RESET + "│");
+        }
+
+        // Draw the bottom line
+        System.out.println("   " + "└" + "─".repeat(W) + "┘");
+
+    
+        System.out.println(BLUE_FG + "\n   Press Enter to skip…" + RESET);
+
+        try { Thread.sleep(150); } catch (InterruptedException ignored) {}
+
+        //If the user presses enter, quit.
+        try {
+            if (System.in.available() > 0)
+            {
+                new Scanner(System.in).nextLine();
+                break;
+            }
+        } catch (Exception ignored) {}
+    }
+
+    System.out.println("\n" + BLUE_FG + "   Credits finished. Press Enter to return to the main menu." + RESET);
+    new Scanner(System.in).nextLine();
+
+    //show the cursor again and return back to main menu
+    System.out.print("\033[?25h");
+    clearConsole();
+    callMenu();
+}
+
+// Matches ANSI color/style escape sequences like "\u001B[31m" or "\u001B[1;33m".
+// Basically, these are the weird invisible color codes the terminal uses.
+// We detect them so we can remove or ignore them when measuring text width.
+static final Pattern ANSI = Pattern.compile("\\u001B\\[[\\d;]*m");
+
+/**  
+ * Removes ANSI color codes from a string and returns the visible length.
+ */
+static int visibleLength(String s)
+{
+    if (s == null) return 0;
+    return ANSI.matcher(s).replaceAll("").length();
+}
+
+/** *
+ *Centers text in a fixed-width field, but ignores ANSI color codes when calculating padding so the alignment stays visually correct.
+ * @param s The text we want to center.
+ * @param width The total width (number) of characters of the area which we want to center the text.
+ * @return The centered version of the input string.
+*/
+
+static String padCenterAnsi(String s, int width)
+{
+    if (s == null) s = "";
+    int len = visibleLength(s);
+    if (len >= width) //if its already too long, just return it.
+        return s; 
+    int total = width - len;
+    int left  = total / 2;
+    int right = total - left;
+    return " ".repeat(left) + s + " ".repeat(right);
+}
+
+
 
     /**
      * Plays the ASCII animation.
      */
 static void playNyanCat() 
 {
+    System.out.print("\033[?25l");
+
     final String nyanCat = """
                  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                
                 @@@:...................................@@@              
@@ -252,9 +397,9 @@ static String rainbowPrefix(int x, int row, int totalRows)
      * Uses built-in date functions as requested by the user, overriding original project constraint.
      */
     public static void calculateAgeAndZodiac() {
-        System.out.println("\n\033[1;95m" + "-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-" + "\033[0m");
+        System.out.println("\n\033[1;95m" + "-------------------------------------" + "\033[0m");
         System.out.println("\033[1;96m" + "    AGE & ZODIAC MAGIC CALCULATOR " + "\033[0m");
-        System.out.println("\033[1;95m" + "-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-" + "\033[0m");
+        System.out.println("\033[1;95m" + "-------------------------------------" + "\033[0m");
         System.out.println("\033[1;93m" + "Today's Date: " + TODAY.getDayOfMonth() + "." + TODAY.getMonthValue() + "." + TODAY.getYear() + " " + "\033[0m");
         
         // 1. Get the birth date from the user (with error handling)
@@ -264,9 +409,9 @@ static String rainbowPrefix(int x, int row, int totalRows)
         boolean dateValid = false;
         LocalDate birthDate = null;
         while (!dateValid) {
-            day = getValidatedInteger("\n\033[1;36m" + "Enter your magical birth day (DD): " + "\033[0m");
-            month = getValidatedInteger("\033[1;36m" + "Enter your magical birth month (MM): " + "\033[0m");
-            year = getValidatedInteger("\033[1;36m" + "Enter your magical birth year (YYYY): " + "\033[0m");
+            day = getValidatedInteger("\n\033[1;36m" + "Enter your birth day (DD): " + "\033[0m");
+            month = getValidatedInteger("\033[1;36m" + "Enter your birth month (MM): " + "\033[0m");
+            year = getValidatedInteger("\033[1;36m" + "Enter your birth year (YYYY): " + "\033[0m");
 
             if (isValidInputDate(day, month, year)) {
                 try {
@@ -298,7 +443,7 @@ static String rainbowPrefix(int x, int row, int totalRows)
         // 3. Zodiac Sign Calculation (Custom Code)
         String zodiac = calculateZodiacSign(day, month);
         
-        System.out.println("\033[1;96m" + "    YOUR MAGICAL RESULTS:" + "\033[0m");
+        System.out.println("\033[1;96m" + "    YOUR RESULTS:" + "\033[0m");
 
         System.out.println("\033[1;93m" + "    Your Age: " + years + " years, " + months + " months, " + days + " days "); 
         System.out.println("\033[1;94m" + "    Your Zodiac Sign: " + zodiac + " ");  
@@ -557,6 +702,312 @@ static String rainbowPrefix(int x, int row, int totalRows)
 
 //------------------------------------------------------------------------------------------------------------------
 
+//---------------------------------------------------SECOND SCHOOL MENU---------------------------------------------
+/**
+ * secondary school menu
+ */
+static void secschoolMenu() {
+    Scanner sc = new Scanner(System.in);
+    while (true) {
+        clearConsole();
+        System.out.println("\nOption B Secondary School");
+        System.out.println("[A] Prime Numbers");
+        System.out.println("[B] Evaluation of Expression");
+        System.out.println("[C] Return to Main Menu");
+        System.out.print("Select a task: ");
+        String opt = sc.nextLine().trim().toUpperCase();
+
+        switch (opt) {
+            case "A" -> primeNums();
+            case "B" -> expressionEv();
+            case "C" -> {
+                clearConsole();
+                callMenu();
+                return;
+            }
+            default -> System.err.println("Wrong, try again");
+        }
+    }
+}
+
+// prime number task
+
+/**
+ * runs the Sieve of Eratosthenes, Sieve of Sundaram, and Sieve of
+Atkin algorithms
+ */
+static void primeNums() {
+    Scanner sc = new Scanner(System.in);
+    int n = 0;
+
+    while (true) {
+        System.out.print("Enter an integer greater than or equal to 12: ");
+        String input = sc.nextLine().trim();
+
+        try {
+            n = Integer.parseInt(input);
+            if (n >= 12) break;
+            System.err.println("Number must be >= 12. Try again.");
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid number format, please re-enter.");
+        }
+    }
+
+    try {
+        // Eratosthenes 
+        long t1 = System.currentTimeMillis();
+        List<Integer> e = sieveEratosthenes(n);
+        long t2 = System.currentTimeMillis();
+
+        // Sundaram 
+        long t3 = System.currentTimeMillis();
+        List<Integer> s = sieveSundaram(n);
+        long t4 = System.currentTimeMillis();
+
+        // Atkin 
+        long t5 = System.currentTimeMillis();
+        List<Integer> a = sieveAtkin(n);
+        long t6 = System.currentTimeMillis();
+
+        System.out.println("\n  Eratosthenes   (" + (t2 - t1) + " ms)");
+        printPrimeSample(e);
+        System.out.println("\n  Sundaram   (" + (t4 - t3) + " ms)");
+        printPrimeSample(s);
+        System.out.println("\n  Atkin   (" + (t6 - t5) + " ms)");
+        printPrimeSample(a);
+
+    } catch (OutOfMemoryError memErr) {
+        System.err.println("Memory overflow, the input too large for available memory.");
+    } catch (Exception ex) {
+        System.err.println("Unexpected error: " + ex.getMessage());
+    }
+
+    System.out.print("\nPress enter to go back");
+    sc.nextLine();
+}
+
+/**
+ * Prints the first 3 and last 2 primes from a list.
+ * @param primes this is a list of generated prime numbers
+ */
+static void printPrimeSample(List<Integer> primes) {
+    if (primes.size() < 5) System.out.println(primes);
+    else {
+        System.out.println("First 3: " + primes.subList(0, 3));
+        System.out.println("Last 2: " + primes.subList(primes.size() - 2, primes.size()));
+    }
+}
+
+/**
+ * Implements the Sieve of Eratosthenes algorithm.
+ */
+static List<Integer> sieveEratosthenes(int n) {
+    try {
+        boolean[] prime = new boolean[n + 1];
+        Arrays.fill(prime, true);
+        prime[0] = prime[1] = false;
+        for (int i = 2; i * i <= n; i++)
+            if (prime[i])
+                for (int j = i * i; j <= n; j += i)
+                    prime[j] = false;
+        List<Integer> list = new ArrayList<>();
+        for (int i = 2; i <= n; i++) if (prime[i]) list.add(i);
+        return list;
+    } catch (OutOfMemoryError e) {
+        System.err.println("Memory overflow inside Eratosthenes sieve.");
+        return new ArrayList<>();
+    }
+}
+
+/**
+ * Implements the Sieve of Sundaram algorithm with overflow and memory safety.
+ */
+static List<Integer> sieveSundaram(int n) {
+    if (n < 2) return new ArrayList<>();
+
+    int limit = (n - 2) / 2;
+    boolean[] marked;
+
+    try {
+        marked = new boolean[limit + 1];
+    } catch (OutOfMemoryError e) {
+        System.err.println("Memory overflow inside Sundaram sieve. Try a smaller number.");
+        return new ArrayList<>();
+    }
+
+    for (int i = 1; i <= limit; i++) {
+        for (int j = i; ; j++) {
+            long idx = (long) i + j + 2L * i * j;
+            if (idx > limit) break;
+            marked[(int) idx] = true;
+        }
+    }
+
+    List<Integer> primes = new ArrayList<>();
+    if (n > 2) primes.add(2);
+    for (int i = 1; i <= limit; i++) {
+        if (!marked[i]) primes.add(2 * i + 1);
+    }
+    return primes;
+}
+
+/**
+ * Implements the Sieve of Atkin algorithm with safe memory handling.
+ */
+static List<Integer> sieveAtkin(int n) {
+    try {
+        boolean[] sieve = new boolean[n + 1];
+        int sqrt = (int) Math.sqrt(n);
+        for (int x = 1; x <= sqrt; x++) {
+            for (int y = 1; y <= sqrt; y++) {
+                int num = 4 * x * x + y * y;
+                if (num <= n && (num % 12 == 1 || num % 12 == 5)) sieve[num] ^= true;
+                num = 3 * x * x + y * y;
+                if (num <= n && num % 12 == 7) sieve[num] ^= true;
+                num = 3 * x * x - y * y;
+                if (x > y && num <= n && num % 12 == 11) sieve[num] ^= true;
+            }
+        }
+        for (int i = 5; i <= sqrt; i++)
+            if (sieve[i])
+                for (int j = i * i; j <= n; j += i * i)
+                    sieve[j] = false;
+
+        List<Integer> list = new ArrayList<>();
+        if (n > 2) list.add(2);
+        if (n > 3) list.add(3);
+        for (int i = 5; i <= n; i++) if (sieve[i]) list.add(i);
+        return list;
+    } catch (OutOfMemoryError e) {
+        System.err.println("Memory overflow inside Atkin sieve. Try a smaller number.");
+        return new ArrayList<>();
+    }
+}
+
+// expression evaluation
+
+/**
+ * performs arithmetic expression evaluation.
+ */
+static void expressionEv() {
+    Scanner sc = new Scanner(System.in);
+    while (true) {
+        System.out.print("Enter an expression or press q to quit: ");
+        String expr = sc.nextLine().trim();
+        if (expr.equalsIgnoreCase("q")) return;
+
+        if (!isValidExpression(expr)) {
+            System.err.println("Re-enter a valid expression\n");
+            continue;
+        }
+
+        expr = expr.replace('x', '*').replace(':', '/');
+        System.out.println("Expression evaluation:");
+
+        try {
+            recursiveEval(expr);
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+
+        System.out.print("\nPress enter to go back");
+        sc.nextLine();
+        return;
+    }
+}
+
+/**
+ * Validates an arithmetic expression to ensure it only contains safe characters.
+ */
+static boolean isValidExpression(String s) {
+    if (!Pattern.matches("[0-9+\\-x:\\(\\)*/\\s]+", s)) return false;
+    int bal = 0;
+    for (char c : s.toCharArray()) {
+        if (c == '(') bal++;
+        else if (c == ')') bal--;
+        if (bal < 0) return false;
+    }
+    return bal == 0;
+}
+
+/**
+ * evaluates a mathematical expression and prints each step.
+ */
+static void recursiveEval(String expr) throws Exception {
+    expr = expr.replaceAll("\\s+", "");
+
+    while (expr.contains("(")) {
+        int close = expr.indexOf(')');
+        int open = expr.lastIndexOf('(', close);
+        String inside = expr.substring(open + 1, close);
+
+        int val = evaluateFlat(inside, false);
+
+        expr = expr.substring(0, open) + val + expr.substring(close + 1);
+
+        System.out.println("= " + expr);
+    }
+
+    int result = evaluateFlat(expr, true);
+    System.out.println("= " + result);
+}
+
+/**
+ * Evaluates a flat (no parentheses) arithmetic expression step by step.
+ * Every step is printed with an '=' prefix if printSteps is true.
+ */
+static int evaluateFlat(String expr, boolean printSteps) throws Exception {
+    if (!expr.matches("[-0-9+*/]+")) {
+        throw new Exception("Unsafe or invalid expression.");
+    }
+
+    List<String> tokens = new ArrayList<>();
+    StringBuilder num = new StringBuilder();
+
+    for (int i = 0; i < expr.length(); i++) {
+        char c = expr.charAt(i);
+        if (Character.isDigit(c) || (c == '-' && (i == 0 || "+-*/".indexOf(expr.charAt(i - 1)) != -1))) {
+            num.append(c);
+        } else if ("+-*/".indexOf(c) != -1) {
+            tokens.add(num.toString());
+            tokens.add(String.valueOf(c));
+            num.setLength(0);
+        }
+    }
+    tokens.add(num.toString());
+
+    for (int i = 0; i < tokens.size(); i++) {
+        if (tokens.get(i).equals("*") || tokens.get(i).equals("/")) {
+            int left = Integer.parseInt(tokens.get(i - 1));
+            int right = Integer.parseInt(tokens.get(i + 1));
+            int val = tokens.get(i).equals("*") ? left * right : left / right;
+            tokens.set(i - 1, Integer.toString(val));
+            tokens.remove(i);
+            tokens.remove(i);
+            i--;
+            if (printSteps) System.out.println("= " + String.join("", tokens));
+        }
+    }
+
+    int result = Integer.parseInt(tokens.get(0));
+    for (int i = 1; i < tokens.size(); i += 2) {
+        String op = tokens.get(i);
+        int val = Integer.parseInt(tokens.get(i + 1));
+        result = op.equals("+") ? result + val : result - val;
+
+        if (printSteps && i < tokens.size() - 2) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(result);
+            for (int j = i + 2; j < tokens.size(); j++) {
+                sb.append(tokens.get(j));
+            }
+            System.out.println("= " + sb.toString());
+        }
+    }
+
+    return result;
+}
+//------------------------------------------------------------------------------------------------------------------
 
 //-------------------------------------------------- CONNECT FOUR ---------------------------------------------------
 		//game constants
@@ -577,6 +1028,10 @@ static String rainbowPrefix(int x, int row, int totalRows)
 		static final String YELLOW_FG = "\u001B[38;5;226m";
 		static final String BLUE_FG   = "\u001B[38;5;45m";
 		static final String GRAY_FG   = "\u001B[38;5;240m";
+        static final String GREEN_FG  = "\u001B[38;5;82m";
+        static final String PINK_FG   = "\u001B[38;5;213m";
+        static final String WHITE_FG  = "\u001B[38;5;15m";
+
 
 /**
  * The main function that runs the Connect Four game.
@@ -1283,7 +1738,7 @@ static boolean isFull()
 
 /**
  * Computes and returns the list of all valid columns the next move can be played in.
- * A list of 0-indexed columns that arent full.
+ * @return A list of 0-indexed columns that arent full.
  */
 static List<Integer> getValidMoves()
 {
@@ -1393,6 +1848,292 @@ static String render()
 
     return sb.toString();            
     }
+//--------------------------------------------------------------------------------------------------------
 
+//-----------------------------------------HIGH SCHOOL LEVEL----------------------------------------------
+
+/** Main part of the program.
+     * I used a while loop here so the menu can repeat.
+     * This makes it easier for the user to try both parts without restarting the program. */
+    public static void highschool() 
+    {
+
+        Scanner input = new Scanner(System.in);
+        boolean runProgram = true;
+
+        while (runProgram) {
+            System.out.println("\n===== HIGH SCHOOL MENU =====");
+            System.out.println("[1] Statistical Information about an Array");
+            System.out.println("[2] Distance between Two Arrays");
+            System.out.println("[3] Return to Main Menu");
+            System.out.print("Select an option: ");
+
+            int choice = safeIntInput(input);
+
+            if (choice == 1) {
+                statisticalInfo();
+            } else if (choice == 2) {
+                distanceBetweenArrays();
+            } else if (choice == 3) {
+                runProgram = false;
+            } else {
+                System.out.println("Invalid choice! Please try again.");
+            }
+        }
+
+        System.out.println("Program finished. Returning to Main Menu...");
+    }
+
+    /** Custom method to safely read integers.
+     * I added this because nextInt() throws an error if the user writes text.
+     * This way, it just asks again until a valid number is entered. */
+    public static int safeIntInput(Scanner input) {
+        while (true) {
+            try {
+                return input.nextInt();
+            } catch (InputMismatchException e) {
+                System.out.print("Invalid input! Please enter a number: ");
+                input.nextLine();
+            }
+        }
+    }
+
+    /** Similar method for doubles.
+     * It helps when the array needs decimal values instead of integers. */
+    public static double safeDoubleInput(Scanner input) {
+        while (true) {
+            try {
+                return input.nextDouble();
+            } catch (InputMismatchException e) {
+                System.out.print("Invalid input! Please enter a valid number: ");
+                input.nextLine();
+            }
+        }
+    }
+
+    /** Calculates basic statistics for an array.
+     * This includes median, arithmetic mean, geometric mean, and harmonic mean.
+     * I wanted this part to handle any size input smoothly without breaking. */
+    public static void statisticalInfo() {
+
+        Scanner input = new Scanner(System.in);
+        int n;
+
+        // asking user until they type a positive number
+        while (true) {
+            System.out.print("Enter array size (positive integer): ");
+            n = safeIntInput(input);
+            if (n > 0) break;
+            System.out.println("Size must be greater than 0!");
+        }
+        
+        double[] arr;
+        try
+        {
+            arr = new double[n];
+        }
+        catch (OutOfMemoryError e)
+        {
+            System.err.println("Error: Array too large! Please try a smaller size.");
+            pause(); 
+            return;  
+        }
+
+        System.out.println("Enter " + n + " elements:");
+
+        for (int i = 0; i < n; i++) {
+            arr[i] = safeDoubleInput(input);
+        }
+
+        Arrays.sort(arr); // sorting makes median easier
+
+        double median = getMedian(arr);
+        double arithmeticMean = getArithmeticMean(arr);
+        double geometricMean = getGeometricMean(arr);
+        double harmonicMean = getHarmonicMeanRecursive(arr, 0);
+
+        System.out.println("\nSorted Array: " + Arrays.toString(arr));
+        System.out.printf("Median: %.4f\n", median);
+        System.out.printf("Arithmetic Mean: %.4f\n", arithmeticMean);
+        System.out.printf("Geometric Mean: %.4f\n", geometricMean);
+        System.out.printf("Harmonic Mean (recursive): %.4f\n", harmonicMean);
+
+        pause();
+    }
+
+    /** Finds the middle value (median) of a sorted array.
+     * If the count is even, I just take the average of the two middle numbers. */
+    public static double getMedian(double[] arr) {
+        int n = arr.length;
+        if (n % 2 == 0) {
+            return (arr[n / 2 - 1] + arr[n / 2]) / 2.0;
+        } else {
+            return arr[n / 2];
+        }
+    }
+
+    /** Simple average = total sum / number of elements. */
+    public static double getArithmeticMean(double[] arr) {
+        double sum = 0;
+        for (double num : arr) {
+            sum += num;
+        }
+        return sum / arr.length;
+    }
+
+    /** Geometric mean multiplies everything and takes the nth root.
+     * This is useful when numbers grow exponentially. */
+    public static double getGeometricMean(double[] arr) {
+        double product = 1;
+        for (double num : arr) {
+            product *= num;
+        }
+        return Math.pow(product, 1.0 / arr.length);
+    }
+
+    /** Harmonic mean calculated recursively.
+     * It sums reciprocals and divides the number of items by that total.
+     * I added a check to skip zeros so the program keeps running properly. */
+    public static double getHarmonicMeanRecursive(double[] arr, int index) {
+
+        if (index == arr.length) {
+            return 0;
+        }
+
+        double current = arr[index];
+        if (current == 0) {
+            System.out.println("Note: skipped a zero value here.");
+            return getHarmonicMeanRecursive(arr, index + 1);
+        }
+
+        double sum = (1 / current) + getHarmonicMeanRecursive(arr, index + 1);
+
+        if (index == 0) {
+            int count = 0;
+            for (double num : arr) if (num != 0) count++;
+            return count / sum;
+        } else {
+            return sum;
+        }
+    }
+
+    /** Second section: calculates distances between two arrays.
+     * It finds Manhattan, Euclidean, and Cosine Similarity.
+     * This part is basically about comparing patterns between numbers. */
+    public static void distanceBetweenArrays() {
+
+        Scanner input = new Scanner(System.in);
+        int dim;
+
+        while (true) {
+            System.out.print("Enter array dimension (positive integer): ");
+            dim = safeIntInput(input);
+            if (dim > 0) break;
+            System.out.println("Dimension must be greater than 0!");
+        }
+
+        int[] arr1;
+        int[] arr2;
+
+    try
+    {   
+        arr1 = new int[dim];
+        arr2 = new int[dim];
+    }
+    catch (OutOfMemoryError e)
+    {
+        System.err.println("Error: Java heap space-dimension is too large for this machine. Please try a smaller value.");
+        pause();
+        return;
+    }
+
+        System.out.println("Enter elements for first array (0-9):");
+        readValidatedArray(arr1, input);
+
+        System.out.println("Enter elements for second array (0-9):");
+        readValidatedArray(arr2, input);
+
+        double manhattan = manhattanDistance(arr1, arr2);
+        double euclidean = euclideanDistance(arr1, arr2);
+        double cosine = cosineSimilarity(arr1, arr2);
+
+        System.out.printf("\nManhattan Distance: %.4f\n", manhattan);
+        System.out.printf("Euclidean Distance: %.4f\n", euclidean);
+        System.out.printf("Cosine Similarity: %.4f\n", cosine);
+
+        pause();
+    }
+
+    /** Reads each element carefully and only accepts values between 0 and 9.
+     * If something else is written, it asks again. */
+    public static void readValidatedArray(int[] arr, Scanner input) {
+        for (int i = 0; i < arr.length; i++) {
+            while (true) {
+                System.out.print("Element " + (i + 1) + ": ");
+                try {
+                    int val = input.nextInt();
+                    if (val >= 0 && val <= 9) {
+                        arr[i] = val;
+                        break;
+                    } else {
+                        System.out.println("Please enter a number between 0 and 9.");
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("That doesn't look like a number. Try again.");
+                    input.nextLine();
+                }
+            }
+        }
+    }
+
+    /** Manhattan distance = sum of |x - y|.
+     * I chose this one because it’s simple and easy to understand visually. */
+    public static double manhattanDistance(int[] a, int[] b) {
+        double sum = 0;
+        for (int i = 0; i < a.length; i++) {
+            sum += Math.abs(a[i] - b[i]);
+        }
+        return sum;
+    }
+
+    /** Euclidean distance = square root of sum of squared differences.
+     * Basically how far two points are “straight-line” apart. */
+    public static double euclideanDistance(int[] a, int[] b) {
+        double sumSq = 0;
+        for (int i = 0; i < a.length; i++) {
+            double diff = a[i] - b[i];
+            sumSq += Math.pow(diff, 2);
+        }
+        return Math.sqrt(sumSq);
+    }
+
+    /** Cosine similarity checks the angle between two vectors.
+     * The closer the result is to 1, the more similar they are.
+     * I added a small check to prevent division by zero here. */
+    public static double cosineSimilarity(int[] a, int[] b) {
+        double dot = 0;
+        double normA = 0;
+        double normB = 0;
+
+        for (int i = 0; i < a.length; i++) {
+            dot += a[i] * b[i];
+            normA += a[i] * a[i];
+            normB += b[i] * b[i];
+        }
+
+        if (normA == 0 || normB == 0) {
+            System.out.println("One of the vectors is all zeros, so I just return 0.");
+            return 0;
+        }
+
+        return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+    }
+
+    /** Just a short pause so the user can read the results before menu appears again. */
+    public static void pause() {
+        Scanner input = new Scanner(System.in);
+        System.out.print("\nPress Enter to return...");
+        input.nextLine();
+    }
 
 }
