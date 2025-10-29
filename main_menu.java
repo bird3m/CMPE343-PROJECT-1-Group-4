@@ -415,21 +415,21 @@ static String rainbowPrefix(int x, int row, int totalRows)
 
             if (isValidInputDate(day, month, year)) {
                 try {
-                    birthDate = LocalDate.of(year, month, day);
-                    if (birthDate.isAfter(TODAY)) {
-                         // REVISED ERROR MESSAGE 1
+                     birthDate = LocalDate.of(year, month, day);
+                    if (isDateAfter(birthDate, TODAY)) {
+                         //ERROR MESSAGE 1
                          System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: TIME TRAVELER DETECTED! !!!" + "\033[0m");
                          System.out.println("\033[1;91m" + "The birth date can't be in the future (after " + TODAY + ")! " + "\033[0m");
                     } else {
                         dateValid = true;
                     }
                 } catch (Exception e) {
-                    // REVISED ERROR MESSAGE 2
+                    //ERROR MESSAGE 2
                     System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: INVALID DATE COMBINATION! !!!" + "\033[0m");
                     System.out.println("\033[1;91m" + "Oopsie! That date combination (" + day + "." + month + "." + year + ") doesn't exist in our magical calendar! " + "\033[0m");
                 }
             } else {
-                // REVISED ERROR MESSAGE 3
+                //ERROR MESSAGE 3
                 System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: OUT OF RANGE! !!!" + "\033[0m");
                 System.out.println("\033[1;91m" + "That date seems a bit too magical! Please ensure the day (1-31), month (1-12), and a reasonable year are entered! " + "\033[0m");
             }
@@ -448,6 +448,31 @@ static String rainbowPrefix(int x, int row, int totalRows)
         System.out.println("\033[1;93m" + "    Your Age: " + years + " years, " + months + " months, " + days + " days "); 
         System.out.println("\033[1;94m" + "    Your Zodiac Sign: " + zodiac + " ");  
         
+    }
+    /**
+     * Compares if a date comes after than the other.
+     * @param date1 First date to compare
+     * @param date2 Second date to compare
+     * @return true if date1 is after date2, false otherwise
+     */
+    public static boolean isDateAfter(LocalDate date1, LocalDate date2)
+    {
+        // First compare years
+        if (date1.getYear() > date2.getYear()) {
+            return true;
+        } else if (date1.getYear() < date2.getYear()) {
+            return false;
+        }
+        
+        // Years are equal, compare months
+        if (date1.getMonthValue() > date2.getMonthValue()) {
+            return true;
+        } else if (date1.getMonthValue() < date2.getMonthValue()) {
+            return false;
+        }
+        
+        // Months are equal, compare days
+        return date1.getDayOfMonth() > date2.getDayOfMonth();
     }
     
     /**
@@ -1870,13 +1895,19 @@ static String render()
 
             int choice = safeIntInput(input);
 
-            if (choice == 1) {
+            if (choice == 1){
+                clearConsole();
                 statisticalInfo();
-            } else if (choice == 2) {
+            } 
+            else if (choice == 2) {
+                clearConsole();
                 distanceBetweenArrays();
-            } else if (choice == 3) {
-                runProgram = false;
-            } else {
+            } 
+            else if (choice == 3) {
+                clearConsole();
+                callMenu();
+            } 
+            else {
                 System.out.println("Invalid choice! Please try again.");
             }
         }
@@ -2010,7 +2041,9 @@ static String render()
 
         if (index == 0) {
             int count = 0;
-            for (double num : arr) if (num != 0) count++;
+            for (double num : arr) 
+                if (num != 0) 
+                    count++;
             return count / sum;
         } else {
             return sum;
