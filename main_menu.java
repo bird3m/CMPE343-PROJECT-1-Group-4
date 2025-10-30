@@ -5,10 +5,100 @@ import java.util.*; //for scanner,lists, random
 import java.util.regex.Pattern;
 
 
-
+/**
+ * CMPE343 interactive, ANSI-colored, animated CLI program
+ * that bundles several mini-modules and a Connect Four game under one main menu.
+ *
+ * <h2>Overview</h2>
+ * <ul>
+ *   <li><b>Main Menu:</b> Animated welcome (typewriter + glow), optional NyanCat intro,
+ *       and a cinematic <i>Credits</i> roll. Options:
+ *       <ul>
+ *         <li>A: Primary School</li>
+ *         <li>B: Secondary School</li>
+ *         <li>C: High School</li>
+ *         <li>D: University (Connect Four)</li>
+ *         <li>E: Terminate</li>
+ *         <li>F: Credits</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>Primary School:</b>
+ *     <ul>
+ *       <li><b>Age &amp; Zodiac</b> — Validates date input; computes age (years, months, days)
+ *           via {@code java.time} and returns Zodiac sign.</li>
+ *       <li><b>Word Reversal Wonderland</b> — Recursively reverses words while preserving the
+ *           positions of non-letter characters; robust tokenization and input handling.</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Secondary School:</b>
+ *     <ul>
+ *       <li><b>Prime Numbers</b> — Generates primes up to {@code n} using
+ *           Sieve of Eratosthenes, Sundaram, and Atkin (with basic OOM safety).</li>
+ *       <li><b>Expression Evaluation</b> — Step-by-step integer evaluator with precedence;
+ *           maps user ops {@code x} and {@code :} to {@code *} and {@code /} only when safe.</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>High School:</b>
+ *     <ul>
+ *       <li><b>Array Statistics</b> — Median, arithmetic mean, geometric mean, and recursive
+ *           harmonic mean (with zero handling).</li>
+ *       <li><b>Vector Distances</b> — Manhattan, Euclidean, and cosine similarity.</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>University — Connect Four:</b> Colored ASCII board, variable sizes
+ *       (5×4, 6×5, 7×6); single-player vs Minimax AI (alpha-beta pruning) or local 2P;
+ *       heuristic scoring and center-column preference.</li>
+ * </ul>
+ *
+ * <h2>User Experience &amp; Terminal Notes</h2>
+ * <ul>
+ *   <li>ANSI escape codes are used for color, effects, and cursor visibility
+ *       (see {@code BLUE_FG}, {@code RESET}, etc.). On Windows, ensure the terminal
+ *       supports ANSI (e.g., Windows Terminal, recent PowerShell/CMD with VT enabled).</li>
+ *   <li>{@link #clearConsole()} performs a simple ANSI-based clear; behavior can vary by terminal.</li>
+ *   <li>Animations (Nyan Cat, banners, credits) temporarily hide the cursor and repaint frames.</li>
+ * </ul>
+ *
+ * <h2>Input Robustness</h2>
+ * <ul>
+ *   <li>Menu input is line-based; numeric reads are guarded (e.g., {@code safeIntInput}).</li>
+ *   <li>Large allocations catch {@link OutOfMemoryError} and fail gracefully with messages.</li>
+ *   <li>Expression validator rejects unsafe characters and enforces simple grammar.</li>
+ * </ul>
+ *
+ * <h2>Build &amp; Run</h2>
+ * <pre>
+ * javac main_menu.java
+ * java main_menu
+ * </pre>
+ *
+ * <h2>Generate Javadoc</h2>
+ * <pre>
+ * javadoc -private -d doc main_menu.java
+ * </pre>
+ * Open {@code doc/index.html}.
+ *
+ * <h2>Implementation Notes</h2>
+ * <ul>
+ *   <li>Allman brace style is used for readability.</li>
+ *   <li>Time calculations rely on {@link java.time.LocalDate} and {@link java.time.temporal.ChronoUnit}.</li>
+ *   <li>Connect Four AI depth adapts to board size for performance.</li>
+ *   <li>Centering helpers ignore ANSI codes to keep visual alignment correct.</li>
+ * </ul>
+ *
+ * <h2>Limitations</h2>
+ * <ul>
+ *   <li>ANSI rendering depends on terminal support; fallback is monochrome text.</li>
+ *   <li>Expression evaluator works on integers; division is truncating.</li>
+ * </ul>
+ * @since   2025-10
+ */
 public class main_menu
 {
-
+    /**
+     * Initializes the program and delegates to {@link #callMenu()} to render the animated welcome and display the main menu loop.
+     * @param args command line arguments.
+     */
 	public static void main(String[] args) 
 	{
 		callMenu();
@@ -413,12 +503,13 @@ static String rainbowPrefix(int x, int row, int totalRows)
 }
 
 //-------------------------------------------------PRIMARY SCHOOL---------------------------------------------------
-/**
-     * Displays the Primary School submenu and manages user selection.
-     */
+
+    
     static Scanner scanner = new Scanner(System.in);
     static final LocalDate TODAY = LocalDate.now();
-
+ /**
+  * Displays the Primary School submenu and manages user selection.
+     */
     public static void primarySchoolMenu() {
         boolean running = true;
         while (running) {
