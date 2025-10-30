@@ -79,11 +79,22 @@ public class Group04 {
     // --- A - Primary School Methods ---
     
     /**
-     * Displays the Primary School submenu and manages user selection.
+     * Displays the Primary School submenu with animated ASCII art and manages user selection.
      */
     public static void primarySchoolMenu() {
         boolean running = true;
         while (running) {
+            clearScreen();
+            
+            // Animasyonlu ve renkli ASCII Art
+            try {
+                printAnimatedAsciiArt();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+            // --- Menü ---
             System.out.println("\n\033[1;92m" + "------------------------------------" + "\033[0m");
             System.out.println("\033[1;96m" + "    PRIMARY SCHOOL FUN ZONE! " + "\033[0m");
             System.out.println("\033[1;92m" + "------------------------------------" + "\033[0m");
@@ -93,8 +104,7 @@ public class Group04 {
             System.out.println("\033[1;92m" + "------------------------------------" + "\033[0m");
             
             String choice = getUserChoice("\n\033[1;36m" + "Choose your fun activity (1-3):" + "\033[0m");
-            
-            clearScreen(); // The screen should be cleared after submenu selection
+            clearScreen();
 
             switch (choice) {
                 case "1":
@@ -106,18 +116,77 @@ public class Group04 {
                     askForRepeatOrReturn(Group04::reverseWordsOperation, Group04::primarySchoolMenu);
                     return;
                 case "3":
-                    return; // Exit the primarySchoolMenu method and return to mainMenu
+                    return;
                 default:
                     System.out.println("\n\033[1;91m" + "Oh no! That's not a valid choice! " + "\033[0m");
             }
         }
     }
+
+    /**
+     * Prints animated and colorful ASCII art for Primary School menu
+     */
+    private static void printAnimatedAsciiArt() throws InterruptedException {
+        String asciiArt =
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣤⣄⡀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡸⠋⠀⠘⣇⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⠇⠀⠀⠀⢸⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡜⠀⠀⠀⠀⢸⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⠇⠀⠀⠀⠀⢸⠇⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡎⠀⠀⠀⠀⠀⢸⠀⠀⠀\n" +
+            "⠀⠀⢀⣀⣀⣀⠀⠀⠀⠀⠀⢀⣀⣤⡤⠤⠤⠤⠤⢤⣤⣀⡤⢖⡿⠛⠉⢳⠀⠀⠀⠀⠀⢸⠀⠀⠀\n" +
+            "⠀⢼⠁⠉⠉⠛⠻⢭⡓⠒⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠰⣏⠀⠀⠀⢸⠀⠀⠀⠀⠀⡤⠀⠀⠀\n" +
+            "⠀⠸⡄⠀⠀⠀⠀⢸⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠂⠀⠀⡜⠀⠀⠀⠀⢀⡇⠀⠀⠀\n" +
+            "⠀⠀⢷⠀⠀⠀⠠⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢣⢠⠏⠀⠀⠀⠀⢸⠃⠀⠀⠀\n" +
+            "⠀⠀⠈⢧⠀⢀⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡞⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠈⢳⡈⠁⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀⠀⣶⣶⣦⠀⠀⢹⠀⠀⠀⠀⠀⡎⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⢠⣾⣟⣹⡄⠀⠀⠀⠀⡀⠀⣿⣿⣿⡇⠀⢈⣧⠤⠤⠶⠶⢷⠒⠒⠂⠀\n" +
+            "⠀⠀⢀⣀⣠⡧⠄⠀⠀⠀⣾⣿⣿⣿⠇⠀⠀⠀⠙⠁⠀⠙⠻⠿⠃⠀⠨⣼⣤⣀⡀⠀⠈⢧⠀⠀⠀\n" +
+            "⠘⠉⠁⠀⢸⣤⡤⠀⠀⠀⠛⢿⡿⠋⠀⠀⠀⠀⠴⠦⠀⠀⠀⠀⠀⠐⣲⣯⡀⠀⠈⠙⠓⠺⣧⣄⡀\n" +
+            "⠀⣀⡤⠚⠉⢳⡴⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡼⠃⠀⠈⠓⢦⡀⠀⠀⢸⠀⠈\n" +
+            "⠀⠁⠀⢀⡔⠉⠙⡶⢄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠴⠚⠁⠀⠀⠀⠀⠀⠀⠈⠓⠆⠀⡇⠀\n" +
+            "⠀⠀⠰⠋⠀⠀⢸⡇⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠁⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠈⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡎⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠹⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠙⢆⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠄⠀⢰⠇⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⠶⠺⣇⠀⣀⡜⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢱⡄⠀⠀⠀⠹⡟⠒⢢⡀⠀⠀⠀⠀⢀⡏⠀⠀⠀⠈⠉⠉⠁⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣄⠀⠀⢀⡇⠀⠀⠻⣄⠀⠀⠀⡸⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢷⠶⠋⠀⠀⠀⠀⠈⣣⠶⠖⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀";
+
+    String[] colors = {
+        "\033[1;91m", // kırmızı
+        "\033[1;93m", // sarı
+        "\033[1;92m", // yeşil
+        "\033[1;94m", // mavi
+        "\033[1;95m", // mor
+        "\033[1;96m"  // camgöbeği
+    };
+
+    for (int i = 0; i < 2; i++) { // 3 yerine 2 döngü
+        for (String color : colors) {
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
+            System.out.println(color + asciiArt + "\033[0m");
+            Thread.sleep(80); // 150 yerine 80 ms
+        }
+    }
+}
     
     /**
      * Calculates age (year, month, day) and zodiac sign from the birth date.
-     * Uses built-in date functions as requested by the user, overriding original project constraint.
      */
     public static void calculateAgeAndZodiac() {
+        clearScreen();
+        
+        // Animasyonlu ve renkli ASCII Art
+        try {
+            printAnimatedZodiacArt();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return;
+        }
+
         System.out.println("\n\033[1;95m" + "-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-" + "\033[0m");
         System.out.println("\033[1;96m" + "    AGE & ZODIAC MAGIC CALCULATOR " + "\033[0m");
         System.out.println("\033[1;95m" + "-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-☻-" + "\033[0m");
@@ -137,20 +206,18 @@ public class Group04 {
             if (isValidInputDate(day, month, year)) {
                 try {
                     birthDate = LocalDate.of(year, month, day);
-                    if (birthDate.isAfter(TODAY)) {
-                         // REVISED ERROR MESSAGE 1
+                    // CUSTOM isAfter IMPLEMENTATION - Check if birth date is in the future
+                    if (isDateAfter(birthDate, TODAY)) {
                          System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: TIME TRAVELER DETECTED! !!!" + "\033[0m");
                          System.out.println("\033[1;91m" + "The birth date can't be in the future (after " + TODAY + ")! " + "\033[0m");
                     } else {
                         dateValid = true;
                     }
                 } catch (Exception e) {
-                    // REVISED ERROR MESSAGE 2
                     System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: INVALID DATE COMBINATION! !!!" + "\033[0m");
                     System.out.println("\033[1;91m" + "Oopsie! That date combination (" + day + "." + month + "." + year + ") doesn't exist in our magical calendar! " + "\033[0m");
                 }
             } else {
-                // REVISED ERROR MESSAGE 3
                 System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: OUT OF RANGE! !!!" + "\033[0m");
                 System.out.println("\033[1;91m" + "That date seems a bit too magical! Please ensure the day (1-31), month (1-12), and a reasonable year are entered! " + "\033[0m");
             }
@@ -171,11 +238,122 @@ public class Group04 {
         System.out.println("\033[1;94m" + "    Your Zodiac Sign: " + zodiac + " ");  
         System.out.println("\033[1;95m" + "-✼-✼-✼-✼-✼-✼-✼-✼-✼-✼-✼-✼-✼-✼-✼-✼-✼-✼-" + "\033[0m");
     }
+
+    /**
+     * Prints animated and colorful ASCII art for Zodiac Calculator
+     */
+    private static void printAnimatedZodiacArt() throws InterruptedException {
+        String asciiArt = 
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⡀⠀⠀⠀⠀⢀⣀⣀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⢀⣴⣶⣶⣶⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⠟⠉⠉⠻⣦⣠⣶⣿⠿⠟⠻⣷⡄⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⣾⡟⠁⠀⠈⠉⠛⠿⣿⣾⣿⠿⠿⠿⠿⢿⣿⠃⠀⠀⠀⠀⠙⣿⠉⠀⠀⠀⠀⢻⣧⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⢠⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⠃⠀⣠⣾⠟⣿⣶⠿⠿⣶⣄⣠⣤⣼⣿⣀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠸⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠈⢿⣾⡿⠁⠀⠀⠀⢻⣏⡁⠀⠈⠹⣧⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣧⣄⣀⣠⣼⣷⡀⠀⠀⣰⣾⠟⣿⡄⠀⢸⡏⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⢰⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠙⠻⠶⠶⣿⠛⠛⠛⠀⢠⡿⠁⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⢠⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢷⣤⣤⣴⢿⣧⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠀⢸⣿⡀⠀⠀⠀\n" +
+            "⠀⣀⣠⣤⣼⣿⣤⣀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠀⠀⠀⠠⠶⠾⣿⡿⠿⠿⠷\n" +
+            "⠈⠉⠉⠉⢹⣿⠉⠉⠀⠀⠀⢰⣿⣿⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣷⠀⠀⠀⠀⠀⢰⣿⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⣀⣬⣿⣷⡶⠄⠀⠀⠈⠛⠛⠀⠀⠀⠀⠀⢀⡴⠶⣦⡀⠀⠀⠀⠀⠘⠛⠃⠀⠀⠀⠀⠙⣿⡿⠿⠷⠶⠀\n" +
+            "⠀⠀⠈⠉⠉⠉⢿⣆⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠷⣤⠼⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣴⣿⠃⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⣠⣼⠿⣿⣏⣤⡶⢶⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣽⡿⠛⠿⣶⡄⠀⠀\n" +
+            "⠀⠀⠀⠀⠿⠋⠁⠀⣈⣿⡏⠀⠀⣿⠟⠻⣷⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣾⠿⠋⠀⠀⠀⠀⠁⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⣼⡏⠁⠁⢠⠤⣄⠀⢀⣾⣷⣶⣶⣶⣶⣶⣶⣶⣶⡾⠿⣿⣿⣿⣍⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠹⣷⣤⠄⠘⠷⠋⠈⠙⣷⢻⣇⠀⠀⠀⠀⠀⢰⣿⠀⠀⠘⣿⡌⢻⣿⣦⣀⣀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⢀⣾⠟⣿⡀⠀⣰⣦⣀⣴⡿⠂⠻⣷⣤⣤⣤⣶⡿⠃⠀⠀⠀⠸⣿⡿⠋⠉⠉⢻⣧⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⢸⣿⠀⠈⠛⠛⢿⣿⠹⣿⡀⠀⠀⠀⠈⠉⠉⠁⠀⠀⠀⠀⠀⠀⢻⣷⠀⠀⠀⢸⣏⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠈⢿⣧⡀⠀⠀⢸⣿⣷⡘⢿⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⡇⠀⠀⣼⡏⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠙⠿⣶⣶⠿⠋⠘⠿⣾⠿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣿⣶⡿⠟⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣧⣀⣀⣀⣀⠀⠀⠀⠀⠀⣤⠀⠀⠀⠀⠀⠀⣀⣀⣀⣤⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡏⠉⠛⠛⠛⠛⠿⠿⠿⠿⣿⠿⠿⠿⠿⠿⠿⠛⠛⠋⠉⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢿⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣤⣀⡀⠀⠀⠀⠀⣠⣿⣄⠀⠀⠀⠀⠀⣀⣤⣾⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠛⠻⠿⠟⠛⠛⠛⠛⠛⠻⠿⠿⠟⠛⠛⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀";
+
+String[] colors = {
+        "\033[1;91m", // kırmızı
+        "\033[1;93m", // sarı
+        "\033[1;92m", // yeşil
+        "\033[1;94m", // mavi
+        "\033[1;95m", // mor
+        "\033[1;96m"  // camgöbeği
+    };
+
+    for (int i = 0; i < 2; i++) { // 3 yerine 2 döngü
+        for (String color : colors) {
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
+            System.out.println(color + asciiArt + "\033[0m");
+            Thread.sleep(80); // 150 yerine 80 ms
+        }
+    }
+}
+    
+    /**
+     * Custom implementation of isAfter function
+     * @param date1 First date to compare
+     * @param date2 Second date to compare
+     * @return true if date1 is after date2, false otherwise
+     */
+    private static boolean isDateAfter(LocalDate date1, LocalDate date2) {
+        // First compare years
+        if (date1.getYear() > date2.getYear()) {
+            return true;
+        } else if (date1.getYear() < date2.getYear()) {
+            return false;
+        }
+        
+        // Years are equal, compare months
+        if (date1.getMonthValue() > date2.getMonthValue()) {
+            return true;
+        } else if (date1.getMonthValue() < date2.getMonthValue()) {
+            return false;
+        }
+        
+        // Months are equal, compare days
+        return date1.getDayOfMonth() > date2.getDayOfMonth();
+    }
+    
+    /**
+     * Custom implementation of isBefore function
+     * @param date1 First date to compare
+     * @param date2 Second date to compare
+     * @return true if date1 is before date2, false otherwise
+     */
+    private static boolean isDateBefore(LocalDate date1, LocalDate date2) {
+        // First compare years
+        if (date1.getYear() < date2.getYear()) {
+            return true;
+        } else if (date1.getYear() > date2.getYear()) {
+            return false;
+        }
+        
+        // Years are equal, compare months
+        if (date1.getMonthValue() < date2.getMonthValue()) {
+            return true;
+        } else if (date1.getMonthValue() > date2.getMonthValue()) {
+            return false;
+        }
+        
+        // Months are equal, compare days
+        return date1.getDayOfMonth() < date2.getDayOfMonth();
+    }
     
     /**
      * Initiates the operation to reverse the words in the text received from the user.
      */
     public static void reverseWordsOperation() {
+        clearScreen();
+        
+        // Animasyonlu ve renkli ASCII Art
+        try {
+            printAnimatedWordReversalArt();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return;
+        }
+
         System.out.println("\n\033[1;95m" + "-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-" + "\033[0m");
         System.out.println("\033[1;96m" + "    WORD REVERSAL WONDERLAND! " + "\033[0m");
         System.out.println("\033[1;95m" + "-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-❤-" + "\033[0m");
@@ -183,17 +361,13 @@ public class Group04 {
         
         String input = "";
         
-        // [FIX] We read until a non-empty line is provided. This handles the initial empty line skip
-        // after menu selection or after a Repeat (R) choice.
         while (scanner.hasNextLine()) {
             input = scanner.nextLine();
             if (!input.trim().isEmpty()) {
-                break; // Found non-empty input, exit loop
+                break;
             }
-            // If it was just an empty line (the skipped newline character), loop again
         }
 
-        // Call the main recursive method
         String reversedText = reverseWordsInText(input); 
         
         System.out.println("\n\033[1;92m" + "Original Text:" + "\033[0m");
@@ -201,6 +375,59 @@ public class Group04 {
         System.out.println("\n\033[1;94m" + "Reversed Text:" + "\033[0m");
         System.out.println("\033[1;97m" + reversedText + "\033[0m"); 
     }
+
+    /**
+     * Prints animated and colorful ASCII art for Word Reversal
+     */
+    private static void printAnimatedWordReversalArt() throws InterruptedException {
+        String asciiArt = 
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⣶⠿⠛⠛⠛⠉⠉⠉⠉⠀⠀⠉⠉⠉⠛⠛⠿⣶⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣾⠿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠻⣦⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⠟⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠻⠷⣶⣦⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢈⣻⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⢀⣠⣴⡾⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣾⣻⣿⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⢠⣿⠟⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣀⣀⣀⠀⠀⠀⠀⠀⠘⣿⡟⠁⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⢻⣿⣶⢶⣤⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⡀⠀⠀⢼⡿⠟⠛⠛⠛⠿⠀⠀⠀⠀⠀⠘⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠉⠻⢷⣿⠇⠀⠀⠀⠀⢀⣴⡿⠿⠿⠿⠇⠀⠀⠀⢾⣿⣿⣿⣟⣿⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣧⠀⠀⠀⠀⣀⣀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⣾⡟⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⣿⠛⠁⠀⠀⠀⠀⠀⠀⠸⡇⠀⠀⠀⠀⠶⠚⠛⠛⠿⢿⣿⣿⣷⣾⠟⢻⣷⣀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⣿⠃⠀⣀⣀⠀⠀⠀⠀⠀⢸⣷⠀⠀⠀⠀⠀⠀⠀⠀⣿⣄⡀⠀⠀⠀⠀⠀⣀⣼⠇⠀⠀⠀⠀⢤⣤⣄⣀⠀⢸⣿⡿⠀⠀⠀⠈⠛⣿⡇\n" +
+            "⠀⠀⠀⠀⠀⣸⣿⠟⠛⠉⠉⠁⠀⠀⠀⠀⠘⢿⣦⣄⣀⣀⣀⣠⣴⠞⠉⠙⠛⢿⣶⠶⠶⠿⠛⠁⠀⠀⠀⠀⠀⠀⠀⠉⠙⢷⣾⠟⠁⠀⠀⠀⠀⠀⣿⡅\n" +
+            "⠀⠀⠀⣴⠟⢻⡇⠀⠀⣠⡴⠖⠀⠀⠀⠀⠀⠀⠉⠉⠛⠛⠛⠻⣧⡀⠀⠀⢀⣴⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⡾⠋⠀⠀⠀⠀⠀⠀⢀⣿⠏\n" +
+            "⠀⠀⠈⠁⠀⢸⣇⣴⠞⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠷⠾⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣼⠟⠁⠀⠀⠀⠀⠀⠀⠀⣾⠃⠀\n" +
+            "⠀⠀⠀⠀⠀⢠⣿⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡾⠃⠀⠀⠀⠀⠀⠀⠀⠀⣼⡟⠀⠀\n" +
+            "⠀⠀⠀⠀⢠⡿⠉⢿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠜⠁⠀⠀⠀⠀⠀⠀⠀⠀⣰⣿⠁⠀⠀\n" +
+            "⠀⠀⠀⠀⠘⠀⠀⢸⣿⠻⢷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⣿⠃⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⢠⣿⠃⠀⠀⠈⠓⠒⢦⠰⠆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣿⠃⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⢠⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⡿⠃⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⢠⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⡟⠁⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⢀⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⢀⣼⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣿⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⣠⣾⠟⠀⠀⠀⠀⠀⠀⠀⠀⣠⣤⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠈⢿⣇⡀⠀⠀⠀⢀⣠⣴⣶⡿⠛⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠈⠻⢷⣶⣶⣿⠿⠛⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠿⠀⠀⠀⠀⠀⠀⠀⠀";
+
+    String[] colors = {
+        "\033[1;92m", // yeşil
+        "\033[1;96m", // camgöbeği
+        "\033[1;95m", // mor
+        "\033[1;93m", // sarı
+        "\033[1;94m", // mavi
+        "\033[1;91m"  // kırmızı
+    };
+
+    for (int i = 0; i < 1; i++) { // 2 yerine 1 döngü
+        for (String color : colors) {
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
+            System.out.println(color + asciiArt + "\033[0m");
+            Thread.sleep(100); // 200 yerine 100 ms
+        }
+    }
+}
+
+    // ... (geri kalan metodlar aynı kalacak - reverseWordsInText, getValidatedInteger, clearScreen, vb.)
     
     /**
      * Recursively reverses the words in the text.
@@ -209,10 +436,7 @@ public class Group04 {
      * @return The text with reversed words.
      */
     public static String reverseWordsInText(String text) {
-        // A regular expression is used to split the text into words and delimiters (spaces, punctuation).
         String[] tokens = text.split("(?<=\\s)|(?=\\s)|(?<=[^\\p{L}0-9])|(?=[^\\p{L}0-9])");
-        
-        // Call the recursive helper method
         return processTokensRecursively(tokens, 0);
     }
 
@@ -224,22 +448,18 @@ public class Group04 {
      */
     private static String processTokensRecursively(String[] tokens, int index) {
         if (index >= tokens.length) {
-            return ""; // Base case: End of the array is reached.
+            return "";
         }
 
         String token = tokens[index];
         String processedToken;
 
-        // [FIX for Requirement 3] Check if the token is NOT just whitespace or punctuation.
-        // It should contain at least one letter or number and be length 2 or more.
         if (token.matches(".*[\\p{L}0-9]+.*") && token.length() >= 2) { 
-            processedToken = reverseWordPreservingNonLetters(token); // Reverse the word while preserving digit positions
+            processedToken = reverseWordPreservingNonLetters(token);
         } else {
-            // Leave punctuation, or single character/whitespace tokens as they are
             processedToken = token;
         }
 
-        // Recursive call: Process the rest and concatenate the result.
         return processedToken + processTokensRecursively(tokens, index + 1);
     }
     
@@ -249,35 +469,29 @@ public class Group04 {
      * @return The reversed word with non-letter characters in their original positions
      */
     private static String reverseWordPreservingNonLetters(String word) {
-        // First, identify all non-letter characters and their positions
         StringBuilder letters = new StringBuilder();
         StringBuilder result = new StringBuilder();
         int[] nonLetterPositions = new int[word.length()];
         char[] nonLetterChars = new char[word.length()];
         
-        // Separate letters from non-letters
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
             if (Character.isLetter(c)) {
                 letters.append(c);
-                nonLetterPositions[i] = -1; // Mark as letter position
+                nonLetterPositions[i] = -1;
             } else {
-                nonLetterPositions[i] = 1; // Mark as non-letter position
+                nonLetterPositions[i] = 1;
                 nonLetterChars[i] = c;
             }
         }
         
-        // Reverse the letters only
         String reversedLetters = reverseStringRecursively(letters.toString());
         
-        // Reconstruct the word with non-letters in their original positions
         int letterIndex = 0;
         for (int i = 0; i < word.length(); i++) {
             if (nonLetterPositions[i] == -1) {
-                // This was a letter position, take from reversed letters
                 result.append(reversedLetters.charAt(letterIndex++));
             } else {
-                // This was a non-letter position, keep the original character
                 result.append(nonLetterChars[i]);
             }
         }
@@ -286,15 +500,14 @@ public class Group04 {
     }
     
     /**
-     * Recursively reverses the given string. (Meets Requirement 1)
+     * Recursively reverses the given string.
      * @param s The string to be reversed.
      * @return The reversed string.
      */
     private static String reverseStringRecursively(String s) {
         if (s == null || s.length() <= 1) {
-            return s; // Base case
+            return s;
         }
-        // Recursive step: Put the first character at the very end, reverse the rest.
         return reverseStringRecursively(s.substring(1)) + s.charAt(0);
     }
 
@@ -309,24 +522,20 @@ public class Group04 {
         while (!validInput) {
             System.out.print(prompt);
             try {
-                // User attempts to enter a valid integer.
                 if (scanner.hasNextInt()) {
                     number = scanner.nextInt();
                     validInput = true;
                 } else {
-                    // Invalid data type error 
                     System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: NON-NUMERIC INPUT! !!!" + "\033[0m");
                     System.out.println("\033[1;91m" + "That's not a valid number! Please enter digits only! " + "\033[0m"); 
-                    scanner.next(); // Consume the invalid input
+                    scanner.next();
                 }
             } catch (Exception e) {
-                // General catch for unexpected errors
                 System.out.println("\n\033[1;41m\033[1;97m" + "!!! ERROR: UNEXPECTED ISSUE! !!!" + "\033[0m");
                 System.out.println("\033[1;91m" + "Oops! Something went wrong: " + e.getMessage() + " " + "\033[0m");
-                scanner.nextLine(); // Clear the input buffer
+                scanner.nextLine();
             }
         }
-        // [SAFE CLEANUP] Clears the leftover newline character after scanner.nextInt().
         if (scanner.hasNextLine()) {
             scanner.nextLine();
         }
@@ -338,16 +547,13 @@ public class Group04 {
      */
     private static void clearScreen() {
         try {
-            // Clearing with ANSI codes (Works in most modern consoles and terminals)
             System.out.print("\033[H\033[2J");
             System.out.flush();
 
-            // Alternative for Windows (Works in cmd, may not work in IDEs)
             if (System.getProperty("os.name").contains("Windows")) {
                 new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
             }
         } catch (IOException | InterruptedException e) {
-            // If clearing is not possible, just print a few empty lines
             for (int i = 0; i < 50; ++i) System.out.println();
         }
     }
@@ -364,20 +570,16 @@ public class Group04 {
         System.out.println("\033[1;93m" + "    [R] Play Again (Repeat Operation)" + "\033[0m");
         System.out.println("\033[1;94m" + "    [M] Back to Fun Menu" + "\033[0m");
         
-        // We use a validated choice getter to ensure 'R' or 'M' is correctly read, 
-        // preventing the program from treating a newline as an invalid option.
         String choice = getValidatedRMChoice("\n\033[1;36m" + "Enter your choice (R/M):" + "\033[0m").toUpperCase();
         
         if (choice.equals("R")) {
             clearScreen();
-            repeatMethod.run(); 
-            // After the repeated operation is finished, we call itself to ask for R/M again (recursive)
+            repeatMethod.run();
             askForRepeatOrReturn(repeatMethod, menuMethod);
         } else if (choice.equals("M")) {
             clearScreen();
             menuMethod.run();
         } else {
-            // This path should ideally not be reached
             System.out.println("\n\033[1;91m" + "Oopsie! Let's go back to the menu! " + "\033[0m");
             clearScreen();
             menuMethod.run();
@@ -389,7 +591,6 @@ public class Group04 {
      */
     private static String getUserChoice(String prompt) {
         System.out.print(prompt + " ");
-        // Reads the entire line, which is necessary for menu choices.
         if (scanner.hasNextLine()) {
             return scanner.nextLine().trim();
         }
@@ -398,19 +599,17 @@ public class Group04 {
     
     /**
      * Gets a validated R or M choice from the user, handling empty inputs robustly.
-     * This is crucial for preventing the newline skip bug when returning from an operation.
      */
     private static String getValidatedRMChoice(String prompt) {
         String choice = "";
         
-        // Keep reading until a valid 'R' or 'M' is provided.
         while (true) {
              System.out.print(prompt + " ");
              if (scanner.hasNextLine()) {
                  choice = scanner.nextLine().trim().toUpperCase();
                  
                  if (choice.equals("R") || choice.equals("M")) {
-                     return choice; // Valid choice received
+                     return choice;
                  } else {
                      System.out.println("\n\033[1;91m" + "Sweetie, please enter 'R' to Play Again or 'M' for Menu " + "\033[0m");
                  }
@@ -418,23 +617,20 @@ public class Group04 {
         }
     }
 
-
     /**
      * Displays the welcome message (Team members only)
      */
     private static void displayWelcomeMessage() {
-        // Clear screen before showing welcome message
         clearScreen();
         
-        // Team Info structure, without ASCII art
         String teamInfo = 
             "\n" +
             "\033[1;95m" + "----------------------------------------------------------------------------------\n" +
             "\033[1;95m" + "|                                                                                |\n" +
-            "\033[1;95m" + "|             ~ OUR AMAZING CMPE 343 FIRE TEAM ~                               |\n" +
+            "\033[1;95m" + "|             ~ OUR AMAZING CMPE 343 FIRE TEAM ~                                 |\n" +
             "\033[1;95m" + "|                                                                                |\n" +
             "\033[1;95m" + "|      NERGİS HÜSEYNOVA               |    BİRDEM ÜSTÜNDAĞ                     |\n" +
-            "\033[1;95m" + "|      MAIMOONAH BAKR S. AL-MASHHADANI|    NUR SENA CANDAN                       |\n" +
+            "\033[1;95m" + "|      MAIMOONAH BAKR S. AL-MASHHADANI|    NUR SENA CANDAN                     |\n" +
             "\033[1;95m" + "|                                                                                |\n" +
             "\033[1;95m" + "|      May your code be bug-free and full of magic!                              |\n" +
             "\033[1;95m" + "|                                                                                |\n" +
@@ -444,31 +640,26 @@ public class Group04 {
         
         System.out.println(teamInfo);
         
-        // Wait for user input to continue to the main menu
         if (scanner.hasNextLine()) {
             scanner.nextLine();
         }
         clearScreen();
     }
     
-
-    // --- Date Calculation Utility Methods (USING BUILT-IN FUNCTIONS) ---
+    // --- Date Calculation Utility Methods ---
 
     /**
      * Checks if the day, month, and year values are acceptable before attempting to create a LocalDate object.
      */
     private static boolean isValidInputDate(int day, int month, int year) {
-        // We allow for a future year (TODAY.getYear() + 1) to distinguish between 'invalid range'
-        // and 'future date' for a better error message in calculateAgeAndZodiac().
         if (year < 1900 || year > TODAY.getYear() + 1) return false;
         if (month < 1 || month > 12) return false;
-        // The day must be between 1 and 31. LocalDate.of will handle month-specific day counts (e.g., Feb 30).
         if (day < 1 || day > 31) return false; 
         return true;
     }
 
     /**
-     * Calculates the zodiac sign with its corresponding symbol. (UPDATED)
+     * Calculates the zodiac sign with its corresponding symbol.
      */
     private static String calculateZodiacSign(int day, int month) {
         if ((month == 3 && day >= 21) || (month == 4 && day <= 20)) return "Aries ♈";
