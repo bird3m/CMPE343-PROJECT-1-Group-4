@@ -14,7 +14,9 @@ public class main_menu
 		callMenu();
 	}
 	
-	//method for clearing the terminal
+	/**
+     * A method for clearing the terminal.
+     */
 	public static void clearConsole() 
 	{
     	 	System.out.print("\033[H\033[2J");
@@ -22,6 +24,10 @@ public class main_menu
 	}
 	
     static boolean animationFlag = false; // so the animation plays only once
+    /**
+     * Prints the menu screen for the main program.
+     * The user can select one of the options below.
+     */
 	public static void callMenu()
 	{
 
@@ -219,7 +225,6 @@ static int visibleLength(String s)
  * @param width The total width (number) of characters of the area which we want to center the text.
  * @return The centered version of the input string.
 */
-
 static String padCenterAnsi(String s, int width)
 {
     if (s == null) s = "";
@@ -286,23 +291,89 @@ static void playNyanCat()
 }
 
 /**
- * Displays the welcome message in blue color.
+ * Simpler animated welcome: types lines character-by-character with a soft glow.
  */
 static void showWelcomeScreen()
 {
-   String banner =  BLUE_FG + """
-  _     _  _______  ___      _______  _______  __   __  _______    ___   ____   
-| | _ | ||       ||   |    |       ||       ||  |_|  ||       |  |   | |    |  
-| || || ||    ___||   |    |       ||   _   ||       ||    ___|  |___| |_    | 
-|       ||   |___ |   |    |       ||  | |  ||       ||   |___    ___    |   | 
-|       ||    ___||   |___ |      _||  |_|  ||       ||    ___|  |   |   |   | 
-|   _   ||   |___ |       ||     |_ |       || ||_|| ||   |___   |___|  _|   | 
-|__| |__||_______||_______||_______||_______||_|   |_||_______|        |____|  
-""" + RESET; 
+    String[] lines = new String[]
+    {
+        "  _     _  _______  ___      _______  _______  __   __  _______    ___   ____   ",
+        "| | _ | ||       ||   |    |       ||       ||  |_|  ||       |  |   | |    |  ",
+        "| || || ||    ___||   |    |       ||   _   ||       ||    ___|  |___| |_    | ",
+        "|       ||   |___ |   |    |       ||  | |  ||       ||   |___    ___    |   | ",
+        "|       ||    ___||   |___ |      _||  |_|  ||       ||    ___|  |   |   |   | ",
+        "|   _   ||   |___ |       ||     |_ |       || ||_|| ||   |___   |___|  _|   | ",
+        "|__| |__||_______||_______||_______||_______||_|   |_||_______|        |____|  "
+    };
 
-System.out.println(banner);
+    System.out.print("\033[?25l");
+    clearConsole();
+    System.out.println();
 
+    for (String line : lines)
+    {
+        typeLine(BLUE_FG + line + RESET, 1); 
+        System.out.println();
+        try { Thread.sleep(8); } catch (InterruptedException ignored) {}
+    }
+
+    //
+    for (int i = 0; i < 4; i++)
+    {
+        System.out.print("\033[2m");  // dim
+        reprint(lines, BLUE_FG);
+        try { Thread.sleep(35); } catch (InterruptedException ignored) {}
+        System.out.print("\033[22m"); // normal
+        reprint(lines, BLUE_FG);
+        try { Thread.sleep(35); } catch (InterruptedException ignored) {}
+    }
+
+    System.out.println();
+    System.out.println(padCenterAnsi(BLUE_FG + "Press Enter to continue..." + RESET, 84));
+    new Scanner(System.in).nextLine();
+    System.out.print("\033[?25h");
 }
+
+/**
+ * Prints a single line character-by-character with a short delay between each character,
+ * creating a typewriter-like animation effect.
+ * <p>
+ * Used inside {@link #showWelcomeScreenTypewriter()} to simulate the feeling of 
+ * typing text in real time.
+ *
+ * @param s The string to print.
+ * @param perCharDelayMs Delay (in milliseconds) between each character output.
+ */
+static void typeLine(String s, int perCharDelayMs)
+{
+    for (int i = 0; i < s.length(); i++)
+    {
+        System.out.print(s.charAt(i));
+        try { Thread.sleep(perCharDelayMs); 
+        } 
+        catch (InterruptedException ignored) {}
+    }
+}
+
+/**
+ * Clears the console and reprints all banner lines with a specific color.
+ * <p>
+ * Used by {@link #showWelcomeScreenTypewriter()} during the glowing (fade in/out) phase
+ * to refresh the entire ASCII banner with brightness changes.
+ *
+ * @param lines  The array of banner lines to print.
+ * @param color  The ANSI color code to apply (e.g., {@code BLUE_FG}).
+ */
+static void reprint(String[] lines, String color)
+{
+    clearConsole();
+    System.out.println();
+    for (String line : lines)
+    {
+        System.out.println(color + line + RESET);
+    }
+}
+
 
 /**
  * Displays a rainbow trail behind the cat.
@@ -363,6 +434,14 @@ static String rainbowPrefix(int x, int row, int totalRows)
             
             clearConsole(); // The screen should be cleared after submenu selection
 
+            try {
+                printAnimatedAsciiArt();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+
             switch (choice) {
                 case "1":
                     calculateAgeAndZodiac();
@@ -373,7 +452,8 @@ static String rainbowPrefix(int x, int row, int totalRows)
                     askForRepeatOrReturn(main_menu::reverseWordsOperation, main_menu::primarySchoolMenu);
                     return;
                 case "3":
-                    return; // Exit the primarySchoolMenu method and return to mainMenu
+                    clearConsole();
+                    callMenu(); // Exit the primarySchoolMenu method and return to mainMenu
                 default:
                     System.out.println("\n\033[1;91m" + "Oh no! That's not a valid choice! " + "\033[0m");
             }
@@ -393,10 +473,73 @@ static String rainbowPrefix(int x, int row, int totalRows)
     }
     
     /**
+     * Prints animated and colorful ASCII art for Primary School menu
+     */
+    private static void printAnimatedAsciiArt() throws InterruptedException
+    {
+        String asciiArt =
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣤⣄⡀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡸⠋⠀⠘⣇⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⠇⠀⠀⠀⢸⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡜⠀⠀⠀⠀⢸⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⠇⠀⠀⠀⠀⢸⠇⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⡎⠀⠀⠀⠀⠀⢸⠀⠀⠀\n" +
+            "⠀⠀⢀⣀⣀⣀⠀⠀⠀⠀⠀⢀⣀⣤⡤⠤⠤⠤⠤⢤⣤⣀⡤⢖⡿⠛⠉⢳⠀⠀⠀⠀⠀⢸⠀⠀⠀\n" +
+            "⠀⢼⠁⠉⠉⠛⠻⢭⡓⠒⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠰⣏⠀⠀⠀⢸⠀⠀⠀⠀⠀⡤⠀⠀⠀\n" +
+            "⠀⠸⡄⠀⠀⠀⠀⢸⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠂⠀⠀⡜⠀⠀⠀⠀⢀⡇⠀⠀⠀\n" +
+            "⠀⠀⢷⠀⠀⠀⠠⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢣⢠⠏⠀⠀⠀⠀⢸⠃⠀⠀⠀\n" +
+            "⠀⠀⠈⢧⠀⢀⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡞⠀⠀⠀⠀⠀⢸⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠈⢳⡈⠁⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀⠀⣶⣶⣦⠀⠀⢹⠀⠀⠀⠀⠀⡎⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⢠⣾⣟⣹⡄⠀⠀⠀⠀⡀⠀⣿⣿⣿⡇⠀⢈⣧⠤⠤⠶⠶⢷⠒⠒⠂⠀\n" +
+            "⠀⠀⢀⣀⣠⡧⠄⠀⠀⠀⣾⣿⣿⣿⠇⠀⠀⠀⠙⠁⠀⠙⠻⠿⠃⠀⠨⣼⣤⣀⡀⠀⠈⢧⠀⠀⠀\n" +
+            "⠘⠉⠁⠀⢸⣤⡤⠀⠀⠀⠛⢿⡿⠋⠀⠀⠀⠀⠴⠦⠀⠀⠀⠀⠀⠐⣲⣯⡀⠀⠈⠙⠓⠺⣧⣄⡀\n" +
+            "⠀⣀⡤⠚⠉⢳⡴⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡼⠃⠀⠈⠓⢦⡀⠀⠀⢸⠀⠈\n" +
+            "⠀⠁⠀⢀⡔⠉⠙⡶⢄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠴⠚⠁⠀⠀⠀⠀⠀⠀⠈⠓⠆⠀⡇⠀\n" +
+            "⠀⠀⠰⠋⠀⠀⢸⡇⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠁⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠈⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡎⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠹⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠙⢆⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠄⠀⢰⠇⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⠶⠺⣇⠀⣀⡜⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢱⡄⠀⠀⠀⠹⡟⠒⢢⡀⠀⠀⠀⠀⢀⡏⠀⠀⠀⠈⠉⠉⠁⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣄⠀⠀⢀⡇⠀⠀⠻⣄⠀⠀⠀⡸⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢷⠶⠋⠀⠀⠀⠀⠈⣣⠶⠖⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀";
+
+    String[] colors = {
+        "\033[1;91m", // red
+        "\033[1;93m", // yellow
+        "\033[1;92m", // green
+        "\033[1;94m", // blue
+        "\033[1;95m", // purple
+        "\033[1;96m"  // light blue
+    };
+
+    for (int i = 0; i < 2; i++) 
+    { 
+        for (String color : colors) {
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
+            System.out.println(color + asciiArt + "\033[0m");
+            Thread.sleep(80); 
+        }
+    }
+}
+    
+    /**
      * Calculates age (year, month, day) and zodiac sign from the birth date.
      * Uses built-in date functions as requested by the user, overriding original project constraint.
      */
     public static void calculateAgeAndZodiac() {
+
+         clearConsole();
+        
+        // Animasyonlu ve renkli ASCII Art
+        try {
+            printAnimatedZodiacArt();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return;
+        }
+
         System.out.println("\n\033[1;95m" + "-------------------------------------" + "\033[0m");
         System.out.println("\033[1;96m" + "    AGE & ZODIAC MAGIC CALCULATOR " + "\033[0m");
         System.out.println("\033[1;95m" + "-------------------------------------" + "\033[0m");
@@ -449,6 +592,58 @@ static String rainbowPrefix(int x, int row, int totalRows)
         System.out.println("\033[1;94m" + "    Your Zodiac Sign: " + zodiac + " ");  
         
     }
+
+    /**
+     * Prints animated and colorful ASCII art for Zodiac Calculator
+     */
+    private static void printAnimatedZodiacArt() throws InterruptedException {
+        String asciiArt = 
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⡀⠀⠀⠀⠀⢀⣀⣀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⢀⣴⣶⣶⣶⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⠟⠉⠉⠻⣦⣠⣶⣿⠿⠟⠻⣷⡄⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⣾⡟⠁⠀⠈⠉⠛⠿⣿⣾⣿⠿⠿⠿⠿⢿⣿⠃⠀⠀⠀⠀⠙⣿⠉⠀⠀⠀⠀⢻⣧⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⢠⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⠃⠀⣠⣾⠟⣿⣶⠿⠿⣶⣄⣠⣤⣼⣿⣀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠸⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠈⢿⣾⡿⠁⠀⠀⠀⢻⣏⡁⠀⠈⠹⣧⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣧⣄⣀⣠⣼⣷⡀⠀⠀⣰⣾⠟⣿⡄⠀⢸⡏⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⢰⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠉⠙⠻⠶⠶⣿⠛⠛⠛⠀⢠⡿⠁⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⢠⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢷⣤⣤⣴⢿⣧⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⢸⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠀⢸⣿⡀⠀⠀⠀\n" +
+            "⠀⣀⣠⣤⣼⣿⣤⣀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠀⠀⠀⠠⠶⠾⣿⡿⠿⠿⠷\n" +
+            "⠈⠉⠉⠉⢹⣿⠉⠉⠀⠀⠀⢰⣿⣿⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⣿⣷⠀⠀⠀⠀⠀⢰⣿⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⣀⣬⣿⣷⡶⠄⠀⠀⠈⠛⠛⠀⠀⠀⠀⠀⢀⡴⠶⣦⡀⠀⠀⠀⠀⠘⠛⠃⠀⠀⠀⠀⠙⣿⡿⠿⠷⠶⠀\n" +
+            "⠀⠀⠈⠉⠉⠉⢿⣆⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⠷⣤⠼⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣴⣿⠃⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⣠⣼⠿⣿⣏⣤⡶⢶⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣽⡿⠛⠿⣶⡄⠀⠀\n" +
+            "⠀⠀⠀⠀⠿⠋⠁⠀⣈⣿⡏⠀⠀⣿⠟⠻⣷⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣾⠿⠋⠀⠀⠀⠀⠁⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⣼⡏⠁⠁⢠⠤⣄⠀⢀⣾⣷⣶⣶⣶⣶⣶⣶⣶⣶⡾⠿⣿⣿⣿⣍⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠹⣷⣤⠄⠘⠷⠋⠈⠙⣷⢻⣇⠀⠀⠀⠀⠀⢰⣿⠀⠀⠘⣿⡌⢻⣿⣦⣀⣀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⢀⣾⠟⣿⡀⠀⣰⣦⣀⣴⡿⠂⠻⣷⣤⣤⣤⣶⡿⠃⠀⠀⠀⠸⣿⡿⠋⠉⠉⢻⣧⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⢸⣿⠀⠈⠛⠛⢿⣿⠹⣿⡀⠀⠀⠀⠈⠉⠉⠁⠀⠀⠀⠀⠀⠀⢻⣷⠀⠀⠀⢸⣏⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠈⢿⣧⡀⠀⠀⢸⣿⣷⡘⢿⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⡇⠀⠀⣼⡏⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠙⠿⣶⣶⠿⠋⠘⠿⣾⠿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣿⣶⡿⠟⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣧⣀⣀⣀⣀⠀⠀⠀⠀⠀⣤⠀⠀⠀⠀⠀⠀⣀⣀⣀⣤⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡏⠉⠛⠛⠛⠛⠿⠿⠿⠿⣿⠿⠿⠿⠿⠿⠿⠛⠛⠋⠉⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢿⣇⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⣷⣤⣀⡀⠀⠀⠀⠀⣠⣿⣄⠀⠀⠀⠀⠀⣀⣤⣾⡿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+            "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠛⠻⠿⠟⠛⠛⠛⠛⠛⠻⠿⠿⠟⠛⠛⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀";
+
+String[] colors = {
+        "\033[1;91m", // kırmızı
+        "\033[1;93m", // sarı
+        "\033[1;92m", // yeşil
+        "\033[1;94m", // mavi
+        "\033[1;95m", // mor
+        "\033[1;96m"  // camgöbeği
+    };
+
+    for (int i = 0; i < 2; i++) { // 3 yerine 2 döngü
+        for (String color : colors) {
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
+            System.out.println(color + asciiArt + "\033[0m");
+            Thread.sleep(80); // 150 yerine 80 ms
+        }
+    }
+}
+
     /**
      * Compares if a date comes after than the other.
      * @param date1 First date to compare
@@ -735,11 +930,11 @@ static void secschoolMenu() {
     Scanner sc = new Scanner(System.in);
     while (true) {
         clearConsole();
-        System.out.println("\nOption B Secondary School");
-        System.out.println("[A] Prime Numbers");
-        System.out.println("[B] Evaluation of Expression");
-        System.out.println("[C] Return to Main Menu");
-        System.out.print("Select a task: ");
+        System.out.println(BLUE_FG + "\nOption B Secondary School");
+        System.out.println(BLUE_FG + "[A] Prime Numbers");
+        System.out.println(BLUE_FG + "[B] Evaluation of Expression");
+        System.out.println(BLUE_FG + "[C] Return to Main Menu");
+        System.out.print(BLUE_FG + "Select a task: ");
         String opt = sc.nextLine().trim().toUpperCase();
 
         switch (opt) {
@@ -761,7 +956,8 @@ static void secschoolMenu() {
  * runs the Sieve of Eratosthenes, Sieve of Sundaram, and Sieve of
 Atkin algorithms
  */
-static void primeNums() {
+static void primeNums() 
+{
     Scanner sc = new Scanner(System.in);
     int n = 0;
 
@@ -802,9 +998,9 @@ static void primeNums() {
         printPrimeSample(a);
 
     } catch (OutOfMemoryError memErr) {
-        System.err.println("Memory overflow, the input too large for available memory.");
+        System.err.println(RED_FG + "Memory overflow, the input too large for available memory." + RESET);
     } catch (Exception ex) {
-        System.err.println("Unexpected error: " + ex.getMessage());
+        System.err.println(RED_FG + "Unexpected error: " + ex.getMessage());
     }
 
     System.out.print("\nPress enter to go back");
@@ -815,7 +1011,8 @@ static void primeNums() {
  * Prints the first 3 and last 2 primes from a list.
  * @param primes this is a list of generated prime numbers
  */
-static void printPrimeSample(List<Integer> primes) {
+static void printPrimeSample(List<Integer> primes) 
+{
     if (primes.size() < 5) System.out.println(primes);
     else {
         System.out.println("First 3: " + primes.subList(0, 3));
@@ -826,7 +1023,8 @@ static void printPrimeSample(List<Integer> primes) {
 /**
  * Implements the Sieve of Eratosthenes algorithm.
  */
-static List<Integer> sieveEratosthenes(int n) {
+static List<Integer> sieveEratosthenes(int n) 
+{
     try {
         boolean[] prime = new boolean[n + 1];
         Arrays.fill(prime, true);
@@ -839,7 +1037,7 @@ static List<Integer> sieveEratosthenes(int n) {
         for (int i = 2; i <= n; i++) if (prime[i]) list.add(i);
         return list;
     } catch (OutOfMemoryError e) {
-        System.err.println("Memory overflow inside Eratosthenes sieve.");
+        System.err.println(RED_FG + "Memory overflow inside Eratosthenes sieve." + RESET);
         return new ArrayList<>();
     }
 }
@@ -847,7 +1045,8 @@ static List<Integer> sieveEratosthenes(int n) {
 /**
  * Implements the Sieve of Sundaram algorithm with overflow and memory safety.
  */
-static List<Integer> sieveSundaram(int n) {
+static List<Integer> sieveSundaram(int n)
+ {
     if (n < 2) return new ArrayList<>();
 
     int limit = (n - 2) / 2;
@@ -856,7 +1055,7 @@ static List<Integer> sieveSundaram(int n) {
     try {
         marked = new boolean[limit + 1];
     } catch (OutOfMemoryError e) {
-        System.err.println("Memory overflow inside Sundaram sieve. Try a smaller number.");
+        System.err.println( RED_FG + "Memory overflow inside Sundaram sieve. Try a smaller number." + RESET);
         return new ArrayList<>();
     }
 
@@ -879,18 +1078,24 @@ static List<Integer> sieveSundaram(int n) {
 /**
  * Implements the Sieve of Atkin algorithm with safe memory handling.
  */
-static List<Integer> sieveAtkin(int n) {
+static List<Integer> sieveAtkin(int n) 
+{
     try {
         boolean[] sieve = new boolean[n + 1];
         int sqrt = (int) Math.sqrt(n);
-        for (int x = 1; x <= sqrt; x++) {
-            for (int y = 1; y <= sqrt; y++) {
+        for (int x = 1; x <= sqrt; x++)
+         {
+            for (int y = 1; y <= sqrt; y++)
+            {
                 int num = 4 * x * x + y * y;
-                if (num <= n && (num % 12 == 1 || num % 12 == 5)) sieve[num] ^= true;
+                if (num <= n && (num % 12 == 1 || num % 12 == 5)) 
+                    sieve[num] ^= true;
                 num = 3 * x * x + y * y;
-                if (num <= n && num % 12 == 7) sieve[num] ^= true;
+                if (num <= n && num % 12 == 7) 
+                    sieve[num] ^= true;
                 num = 3 * x * x - y * y;
-                if (x > y && num <= n && num % 12 == 11) sieve[num] ^= true;
+                if (x > y && num <= n && num % 12 == 11) 
+                    sieve[num] ^= true;
             }
         }
         for (int i = 5; i <= sqrt; i++)
@@ -904,7 +1109,7 @@ static List<Integer> sieveAtkin(int n) {
         for (int i = 5; i <= n; i++) if (sieve[i]) list.add(i);
         return list;
     } catch (OutOfMemoryError e) {
-        System.err.println("Memory overflow inside Atkin sieve. Try a smaller number.");
+        System.err.println(RED_FG + "Memory overflow inside Atkin sieve. Try a smaller number." + RESET);
         return new ArrayList<>();
     }
 }
@@ -914,7 +1119,8 @@ static List<Integer> sieveAtkin(int n) {
 /**
  * performs arithmetic expression evaluation.
  */
-static void expressionEv() {
+static void expressionEv() 
+{
     Scanner sc = new Scanner(System.in);
     while (true) {
         System.out.print("Enter an expression or press q to quit: ");
@@ -922,11 +1128,11 @@ static void expressionEv() {
         if (expr.equalsIgnoreCase("q")) return;
 
         if (!isValidExpression(expr)) {
-            System.err.println("Re-enter a valid expression\n");
+            System.err.println("Re-enter a valid expression. use +, -, x, :, parentheses, digits)\n");
             continue;
         }
 
-        expr = expr.replace('x', '*').replace(':', '/');
+       /* expr = expr.replace('x', '*').replace(':', '/');
         System.out.println("Expression evaluation:");
 
         try {
@@ -937,22 +1143,61 @@ static void expressionEv() {
 
         System.out.print("\nPress enter to go back");
         sc.nextLine();
+        return;*/
+
+        String evalReady = mapUserOps(expr);
+
+        System.out.println("Expression evaluation:");
+        try
+        {
+            recursiveEval(evalReady);
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error: " + e.getMessage());
+        }
+
+        System.out.print("\nPress enter to go back");
+        sc.nextLine();
         return;
     }
 }
 
 /**
+ * Converts user-input operators 'x' and ':' into '*' and '/'
+ * only when they appear between two operands or parentheses.
+ */
+private static String mapUserOps(String expr)
+{
+    String s = expr;
+
+    // Replace 'x' between a digit or ')' and a digit or '(' → '*'
+    s = s.replaceAll("(?<=(\\d|\\)))\\s*x\\s*(?=(\\d|\\())", "*");
+
+    // Replace ':' between a digit or ')' and a digit or '(' → '/'
+    s = s.replaceAll("(?<=(\\d|\\)))\\s*:\\s*(?=(\\d|\\())", "/");
+
+    return s;
+}
+
+
+/**
  * Validates an arithmetic expression to ensure it only contains safe characters.
  */
-static boolean isValidExpression(String s) {
-    if (!Pattern.matches("[0-9+\\-x:\\(\\)*/\\s]+", s)) return false;
-    int bal = 0;
-    for (char c : s.toCharArray()) {
-        if (c == '(') bal++;
-        else if (c == ')') bal--;
-        if (bal < 0) return false;
+static boolean isValidExpression(String expr)
+{
+    if (!expr.matches("[0-9\\.\\s\\+\\-\\(\\)x:]+"))
+    {
+        return false;
     }
-    return bal == 0;
+
+    
+    if (expr.indexOf('*') >= 0 || expr.indexOf('/') >= 0)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 /**
@@ -981,19 +1226,25 @@ static void recursiveEval(String expr) throws Exception {
  * Evaluates a flat (no parentheses) arithmetic expression step by step.
  * Every step is printed with an '=' prefix if printSteps is true.
  */
-static int evaluateFlat(String expr, boolean printSteps) throws Exception {
-    if (!expr.matches("[-0-9+*/]+")) {
+static int evaluateFlat(String expr, boolean printSteps) throws Exception
+{
+    if (!expr.matches("[-0-9+*/]+"))
+    {
         throw new Exception("Unsafe or invalid expression.");
     }
 
     List<String> tokens = new ArrayList<>();
     StringBuilder num = new StringBuilder();
 
-    for (int i = 0; i < expr.length(); i++) {
+    for (int i = 0; i < expr.length(); i++)
+    {
         char c = expr.charAt(i);
-        if (Character.isDigit(c) || (c == '-' && (i == 0 || "+-*/".indexOf(expr.charAt(i - 1)) != -1))) {
+        if (Character.isDigit(c) || (c == '-' && (i == 0 || "+-*/".indexOf(expr.charAt(i - 1)) != -1)))
+        {
             num.append(c);
-        } else if ("+-*/".indexOf(c) != -1) {
+        }
+        else if ("+-*/".indexOf(c) != -1)
+        {
             tokens.add(num.toString());
             tokens.add(String.valueOf(c));
             num.setLength(0);
@@ -1001,29 +1252,75 @@ static int evaluateFlat(String expr, boolean printSteps) throws Exception {
     }
     tokens.add(num.toString());
 
-    for (int i = 0; i < tokens.size(); i++) {
-        if (tokens.get(i).equals("*") || tokens.get(i).equals("/")) {
-            int left = Integer.parseInt(tokens.get(i - 1));
-            int right = Integer.parseInt(tokens.get(i + 1));
-            int val = tokens.get(i).equals("*") ? left * right : left / right;
+    // --- Multiply / Divide first ---
+    for (int i = 0; i < tokens.size(); i++)
+    {
+        String t = tokens.get(i);
+        if (t.equals("*") || t.equals("/"))
+        {
+            int left, right;
+
+            try
+            {
+                left = Integer.parseInt(tokens.get(i - 1));
+                right = Integer.parseInt(tokens.get(i + 1));
+            }
+            catch (NumberFormatException e)
+            {
+                throw new Exception("Invalid number near operator '" + t + "'");
+            }
+
+            if (t.equals("/") && right == 0)
+            {
+                throw new Exception("Division by zero.");
+            }
+
+            int val = t.equals("*") ? left * right : left / right;
+
             tokens.set(i - 1, Integer.toString(val));
-            tokens.remove(i);
-            tokens.remove(i);
+            tokens.remove(i); // remove operator
+            tokens.remove(i); // remove right operand
             i--;
-            if (printSteps) System.out.println("= " + String.join("", tokens));
+
+            if (printSteps)
+            {
+                System.out.println("= " + String.join("", tokens));
+            }
         }
     }
 
-    int result = Integer.parseInt(tokens.get(0));
-    for (int i = 1; i < tokens.size(); i += 2) {
+    // --- Add / Subtract ---
+    int result;
+    try
+    {
+        result = Integer.parseInt(tokens.get(0));
+    }
+    catch (NumberFormatException e)
+    {
+        throw new Exception("Invalid starting number.");
+    }
+
+    for (int i = 1; i < tokens.size(); i += 2)
+    {
         String op = tokens.get(i);
-        int val = Integer.parseInt(tokens.get(i + 1));
+        int val;
+        try
+        {
+            val = Integer.parseInt(tokens.get(i + 1));
+        }
+        catch (NumberFormatException e)
+        {
+            throw new Exception("Invalid number after operator '" + op + "'");
+        }
+
         result = op.equals("+") ? result + val : result - val;
 
-        if (printSteps && i < tokens.size() - 2) {
+        if (printSteps && i < tokens.size() - 2)
+        {
             StringBuilder sb = new StringBuilder();
             sb.append(result);
-            for (int j = i + 2; j < tokens.size(); j++) {
+            for (int j = i + 2; j < tokens.size(); j++)
+            {
                 sb.append(tokens.get(j));
             }
             System.out.println("= " + sb.toString());
@@ -1031,6 +1328,7 @@ static int evaluateFlat(String expr, boolean printSteps) throws Exception {
     }
 
     return result;
+
 }
 //------------------------------------------------------------------------------------------------------------------
 
@@ -2014,10 +2312,17 @@ static String render()
 
     /** Geometric mean multiplies everything and takes the nth root.
      * This is useful when numbers grow exponentially. */
-    public static double getGeometricMean(double[] arr) {
+    public static double getGeometricMean(double[] arr)
+    {
         double product = 1;
         for (double num : arr) {
             product *= num;
+        }
+
+        if (product < 0)
+        {
+            System.err.println("Geometric mean of a negative number cannot be calculated");
+            return Double.NaN; //not a number
         }
         return Math.pow(product, 1.0 / arr.length);
     }
@@ -2155,7 +2460,7 @@ static String render()
         }
 
         if (normA == 0 || normB == 0) {
-            System.out.println("One of the vectors is all zeros, so I just return 0.");
+            System.out.println(BLUE_FG + "One of the vectors is all zeros, so I just return 0.");
             return 0;
         }
 
@@ -2165,7 +2470,7 @@ static String render()
     /** Just a short pause so the user can read the results before menu appears again. */
     public static void pause() {
         Scanner input = new Scanner(System.in);
-        System.out.print("\nPress Enter to return...");
+        System.out.print(BLUE_FG + "\nPress Enter to return...");
         input.nextLine();
     }
 
